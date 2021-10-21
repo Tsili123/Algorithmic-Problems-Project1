@@ -24,6 +24,7 @@ error_LSH = interface::LSH::LSH_Parse_Input(argc, argv, lsh_input, files, status
 if(error_LSH != 0){
     interface::output::Print_Error_Message_Exit(status);
 }
-
+///////
+int i;
 //parse query
 }
