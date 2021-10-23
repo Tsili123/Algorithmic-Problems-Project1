@@ -1,17 +1,51 @@
 #include <iostream>
 #include <vector>
 #include <string.h>
+#include <fstream>
+#include "../headers/read_file.hpp"
 
 using namespace std;
 
-bool string_operation(char ** str,char *str2,string str3,int i);
+bool string_operation(char ** str,char *str2,string& str3,int i);
 bool number_operation(char ** str,char *str2,int num,int i);
 
 //g++ -c -o main.o main.cpp
-    //g++ -o lsh main.o
-    //./lsh -i doc
+//g++ -o lsh main.o
+//  ./lsh -i doc
+//  /home/users/sdi1700170/projectAlgorithms/files/input_small_id
+// ./lsh -i input_small_id -q query_file -k 4 -L 5 -o output -N 1 -R 1000
+// ./lsh -i input_small_id -q query_file -k 4 -L 5 -o output -N 1 -R 1000
+void read_file(vector<vector<int>> &vec,string input_file){
+    string line;
+    ifstream myfile(input_file);
+    
+    if (myfile.is_open()){
+        int rows = 0;
+        while(getline(myfile,line)){
+            stringstream s;
+            s << line;                   //send the line to the stringstream object
 
-bool string_operation(char ** str,char *str2,string str3,int i){
+            int columns = 0;    
+            double d;
+            vector<int> v1;
+
+            while(s >> d){
+                int num = static_cast<int>(d);
+                v1.push_back(num);
+                columns++;  //while there's something in the line, increase the number of columns
+            } 
+            vec.push_back(v1);
+            //cout << columns;
+            rows++;
+        }
+        cout << rows << endl;
+        
+    }else cout << "Unable to open file"; 
+    myfile.close();
+
+}
+
+bool string_operation(char ** str,char *str2,string &str3,int i){
     if(strcmp(str[i],str2)==0){
             str3 = string(str[i+1]);
             cout << str3 << endl;
@@ -73,7 +107,7 @@ int main(int argc,char** argv){
             }
             K=4;
             L=5;
-            N=1
+            N=1;
             R=10000;
         }else if(argc == 15){ //param arguments
             
@@ -119,8 +153,18 @@ int main(int argc,char** argv){
                 return 1;
             }
 
-        }
-       
-        
+        } 
     }
+    vector<vector<int>> vec;
+    cout << input_file << endl;
+    read_file(vec,input_file);
+    cout << vec.size() << endl;
+    
+    //debug
+    for (int j = 0; j < vec[1].size(); j++)
+    {
+            cout << vec[1][j] << " ";
+    }
+
+    cout << endl;
 }
