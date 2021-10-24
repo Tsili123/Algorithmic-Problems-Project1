@@ -47,8 +47,6 @@ long int num_of_points() {
 
 //g++ -c -o main.o main.cpp
 //g++ -o lsh main.o
-//  ./lsh -i doc
-//  /home/users/sdi1700170/projectAlgorithms/files/input_small_id
 // ./lsh -i input_small_id -q query_file -k 4 -L 5 -o output -N 1 -R 1000
 // ./lsh -i input_small_id -q query_file -k 4 -L 5 -o output -N 1 -R 1000
 void read_file(vector<vector<int>> &vec,string input_file){
