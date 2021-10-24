@@ -81,13 +81,19 @@ void Euclidean_Hash_Function(int L, int k) {
 
         int j=0;
 
-		do{
+        do{
 			int r_value = rand() % k;
 
-			if(find(Hash_Functions[i].begin(), Hash_Functions[i].end(), r_value) == Hash_Functions[i].end()){
-				j++;
-				Hash_Functions[i].push_back(r_value);
-			}
+            auto itA = Hash_Functions[i].begin();
+
+            while(itA != Hash_Functions[i].end()) {
+                if (r_value == itA[0]) break;
+                if (itA != Hash_Functions[i].end()) ++itA;
+                else {
+                    Hash_Functions[i].push_back(r_value);
+                    j++;
+                }
+            }
 		}while(j < k);
 	}
 }
