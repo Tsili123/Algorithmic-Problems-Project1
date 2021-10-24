@@ -2,6 +2,32 @@
 
 using namespace std;
 
+void Print_values(int L, int k) {
+    cout << "L: " << L << endl << "k: " << k << endl;
+    cout << "dimensions: " << dimension << endl << "number of items: " << n << endl;
+
+    /* Print vector v */
+    // for (auto vec: v) {
+    //     cout << "vector v: ";
+    //     for (auto i: vec)
+    //         cout << i << ", ";
+    //     cout << endl;
+    // }
+
+    /* Print vector t */
+    cout << "vector t: ";
+    for (auto vec: t)
+        cout << vec << ", ";  
+    cout << endl;
+}
+
+long long int mod(long long int value, long long int Mod) {
+    if ((value % Mod) < 0) 
+        return (unsigned int) (value % Mod + Mod);
+    else
+        return (unsigned int) (value % Mod);
+}
+
 void Initialize_Hash_parameters() {
     dimension = dim_data();
     n = num_of_points();
@@ -20,7 +46,7 @@ double Normal_distribution() {
 
 void Euclidean_Hash_Function(int L, int k) {
     // Initialize the vectors used for hashing
-    v.resize(k ,vector<double>(dimension));
+    v.resize(k, vector<double>(dimension));
 
     for(int i=0; i < k; i++) {
         v[i].clear();
@@ -66,4 +92,48 @@ void Euclidean_Hash_Function(int L, int k) {
 	}
 }
 
-void Calculate_Hash_Value(int L, int k, int item) {}
+void Calculate_Hash_Value(int L, int k, vector<int> item) {
+    for (int g = 0; g < L; g++) {
+        long long int hash_value = 0;
+        long int ID = -1;
+        for (int h = 0; h < k; h++) {
+            int sum = 0;
+            /* The inner product is calculated by multiplying all the coordinates of 2 vectors and summing them*/
+            for (int dim = 1; dim < dimension; dim++) {
+                sum += item[dim] * v[h][dim];
+            }
+
+            sum += t[h];
+            sum = floor(sum / (double) w);
+            hash_value += sum * Hash_Functions[g][h];
+            hash_value = mod(hash_value, M);
+        }
+
+        ID = hash_value;
+
+        hash_value = mod(hash_value, n/4);
+        // cout << "for table " << g << " hash value is " << hash_value << endl;
+    }
+}
+
+long long int euclidean_dis(vector<int> vec1, vector<int> vec2) {
+    long long int dist=0;
+
+    auto itA = vec1.begin();
+    auto itB = vec2.begin();
+    ++itA;
+    ++itB;
+
+    while(itA != vec1.end() || itB != vec2.end())
+    {
+        dist = dist + (itA[0]-itB[0])*(itA[0]-itB[0]);
+        if(itA != vec1.end()) {
+            ++itA;
+        }
+        if(itB != vec2.end()) {
+            ++itB;
+        }
+    }
+
+	return dist;
+}

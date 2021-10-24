@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <chrono>
 
+#define M 4294967291
+
 #include "../Handling_input/Handling_input.hpp"
 
 using namespace std;
@@ -19,7 +21,7 @@ static vector<vector <double>> v; /* Vectors with random normal numbers, used fo
 static vector<vector <int>> Hash_Functions;
 
 // #Points
-static long int n;
+static long long int n;
 
 // #Dimensions
 // #Numbers in a vector of an item
@@ -36,4 +38,10 @@ void Initialize_Hash_parameters(); /* Initialize the variables used by the hash 
 
 void Euclidean_Hash_Function(int L, int k); /* Here we initialize all vectors */
 
-void Calculate_Hash_Value(int L, int k, int item);
+void Calculate_Hash_Value(int L, int k, vector<int> item);
+
+long long int mod(long long int);
+
+void Print_values(int L, int k); /* Used for Debugging */
+
+long long int euclidean_dis(vector<int> , vector<int> );
