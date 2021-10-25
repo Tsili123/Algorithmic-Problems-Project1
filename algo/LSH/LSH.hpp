@@ -55,6 +55,7 @@ class LSH{
         int get_L() { return L; }
         int get_k() { return k; }
         int get_N() { return N; }
+        int get_R() { return R; }
         // int get_M() { return M; }
         int get_dimension() { return dimension; }
 
@@ -79,5 +80,7 @@ long long int mod(long long int);
 void Print_values(); /* Used for Debugging */
 
 long long int euclidean_dis(vector<int> , vector<int> );
+
+void Search_by_range();
 
 #endif

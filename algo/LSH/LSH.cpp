@@ -7,6 +7,7 @@ extern LSH *Lsh; /* LSH Object */
 void Print_values() {
     cout << "L: " << Lsh->get_L() << endl << "k: " << Lsh->get_k() << endl;
     cout << "dimensions: " << Lsh->get_dimension() << endl << "number of items: " << Lsh->get_PointsNum() << endl;
+    cout << "Range-R: " << Lsh->get_R() << endl << "N: " << Lsh->get_N() << endl;;
 
     /* Print vector v */
     // for (auto vec: v) {
@@ -98,6 +99,7 @@ void Euclidean_Hash_Function(int L, int k) {
 	}
 }
 
+// Place the vector from the input file to a bucket
 void Calculate_Hash_Value(int L, int k, vector<int> item) {
     for (int g = 0; g < L; g++) {
         long long int hash_value = 0;
@@ -122,6 +124,7 @@ void Calculate_Hash_Value(int L, int k, vector<int> item) {
     }
 }
 
+// Calculate Euclidean Distance
 long long int euclidean_dis(vector<int> vec1, vector<int> vec2) {
     long long int dist=0;
 
@@ -142,6 +145,83 @@ long long int euclidean_dis(vector<int> vec1, vector<int> vec2) {
     }
 
 	return dist;
+}
+
+// Return the hash value for a specific query in a table
+int Specific_Hash_Value(int g, vector<int> item) {
+    int L = Lsh->get_L();
+    int k = Lsh->get_k();
+
+    long long int hash_value = 0;
+    long int ID = -1;
+    for (int h = 0; h < k; h++) {
+        int sum = 0;
+        /* The inner product is calculated by multiplying all the coordinates of 2 vectors and summing them*/
+        for (int dim = 1; dim < Lsh->get_dimension(); dim++) {
+            sum += item[dim] * v[h][dim];
+        }
+
+        sum += t[h];
+        sum = floor(sum / (double) Lsh->get_w());
+        hash_value += sum * Hash_Functions[g][h];
+        hash_value = mod(hash_value, M);
+    }
+
+    return mod(hash_value, Lsh->get_PointsNum()/4);
+}
+
+vector<int> Nearest_N_search(vector<int> query) {
+    long int d = M; // Minimum distance
+    long int iterations = 0; // When it reaches 10L stop
+    long int b = -1; // Closest item so far
+
+    int L = Lsh->get_L();
+    int N = Lsh->get_N();
+
+    vector<int> near_items;
+
+    for (int g = 0; g < L; g++) {
+        int hash_value = Specific_Hash_Value(g, query);
+        // For every item in the bucket {
+        iterations++;
+        int euc_dist; // = euclidean_dis(item_from_bucket, query);
+
+        if (euc_dist < d) {
+            d = euc_dist;
+            b = query.front();
+            if (none_of(near_items.begin(), near_items.end(), [b](int item) { return b == item; })) {
+                if (near_items.size() == N) near_items.erase(near_items.begin());
+                near_items.push_back(b);
+            }
+        }
+        if (iterations == 10*L) break;
+        // }
+    }
+
+    return near_items;
+}
+
+vector<int> Search_by_range(vector<int> query) {
+    int L = Lsh->get_L();
+    int k = Lsh->get_k();
+    int R = Lsh->get_R();
+
+    vector<int> near_items;
+
+    for (int g = 0; g < L; g++) {
+        int hash_value = Specific_Hash_Value(g, query);
+        // For every item in the bucket
+        int euc_dist; // = euclidean_dis(item_from_bucket, query);
+
+        if (euc_dist < R) {
+            int index = query.front();
+            if (none_of(near_items.begin(), near_items.end(), [index](int item) { return index == item; })) {
+                near_items.push_back(index);
+            }
+        }
+    }
+
+    return near_items;
 }
 
 /* Initialize the variables used by the hash function */
