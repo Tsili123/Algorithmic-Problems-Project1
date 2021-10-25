@@ -7,7 +7,7 @@ LSH *Lsh;
 int main(int argc, char *argv[]) {
 
     Lsh->data = store_data(argc, argv);
-    
+
     Euclidean_Hash_Function(Lsh->get_L(), Lsh->get_k());
 
     // int counter = 0;

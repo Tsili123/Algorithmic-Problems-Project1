@@ -125,8 +125,8 @@ void Calculate_Hash_Value(int L, int k, vector<int> item) {
 }
 
 // Calculate Euclidean Distance
-long long int euclidean_dis(vector<int> vec1, vector<int> vec2) {
-    long long int dist=0;
+long double euclidean_dis(vector<int> vec1, vector<int> vec2) {
+    long double dist=0.0;
 
     auto itA = vec1.begin();
     auto itB = vec2.begin();
@@ -144,7 +144,7 @@ long long int euclidean_dis(vector<int> vec1, vector<int> vec2) {
         }
     }
 
-	return dist;
+	return sqrt(dist);
 }
 
 // Return the hash value for a specific query in a table
@@ -171,7 +171,7 @@ int Specific_Hash_Value(int g, vector<int> item) {
 }
 
 vector<int> Nearest_N_search(vector<int> query) {
-    long int d = M; // Minimum distance
+    long double d = M; // Minimum distance
     long int iterations = 0; // When it reaches 10L stop
     long int b = -1; // Closest item so far
 
@@ -184,15 +184,19 @@ vector<int> Nearest_N_search(vector<int> query) {
         int hash_value = Specific_Hash_Value(g, query);
         // For every item in the bucket {
         iterations++;
-        int euc_dist; // = euclidean_dis(item_from_bucket, query);
+        long double euc_dist; // = euclidean_dis(item_from_bucket, query);
 
-        if (euc_dist < d) {
+        if (euc_dist < d && near_items.size() == N) {
             d = euc_dist;
             // b = item_from_bucket.front();
             if (none_of(near_items.begin(), near_items.end(), [b](int item) { return b == item; })) {
-                if (near_items.size() == N) near_items.erase(near_items.begin());
+                near_items.erase(near_items.begin());
                 near_items.push_back(b);
             }
+        } else {
+            // b = item_from_bucket.front();
+            near_items.push_back(b);
+            sort(near_items.begin(), near_items.end(), greater<int>());
         }
         if (iterations == 10*L) break;
         // }
@@ -211,7 +215,7 @@ vector<int> Search_by_range(vector<int> query) {
     for (int g = 0; g < L; g++) {
         int hash_value = Specific_Hash_Value(g, query);
         // For every item in the bucket
-        int euc_dist; // = euclidean_dis(item_from_bucket, query);
+        long double euc_dist; // = euclidean_dis(item_from_bucket, query);
 
         if (euc_dist < R) {
             // int index = item_from_bucket.front();
@@ -225,18 +229,20 @@ vector<int> Search_by_range(vector<int> query) {
 }
 
 int Nearest_N_brute(vector<int> query) {
-    long int d = M; // Minimum distance
+    long double d = (double) M; // Minimum distance
     long int b = -1; // Closest item so far
 
     for (auto Item: Lsh->data) {
         if (Item == query) continue;
-        int euc_dist = euclidean_dis(Item, query);
+        long double euc_dist = euclidean_dis(Item, query);
 
         if (euc_dist < d) {
             d = euc_dist;
             b = Item.front();
         }
     }
+
+    cout << d << endl;
 
     return b;
 }
@@ -250,7 +256,7 @@ vector<int> Brute_by_range(vector<int> query) {
 
     for (auto Item: Lsh->data) {
         if (Item == query) continue;
-        int euc_dist = euclidean_dis(Item, query);
+        long double euc_dist = euclidean_dis(Item, query);
 
         if (euc_dist < R) {
             int index = Item.front();
