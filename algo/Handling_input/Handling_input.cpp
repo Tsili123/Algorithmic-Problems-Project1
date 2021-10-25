@@ -3,7 +3,7 @@
 
 using namespace std;
 
-string dir_input;
+string dir_input = "";
 
 extern LSH *Lsh; /* LSH Object */
 
@@ -49,7 +49,7 @@ long int num_of_points() {
 // ./lsh -i input_small_id -q query_file -k 4 -L 5 -o output -N 1 -R 1000
 void read_file(vector<vector<int>> &vec,string input_file){
     string line;
-    dir_input = input_file;
+    if (dir_input == "") dir_input = input_file;
     ifstream Data_File(input_file);
     
     if (Data_File.is_open()){
