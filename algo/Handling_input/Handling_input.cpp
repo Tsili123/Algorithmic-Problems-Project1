@@ -1,13 +1,11 @@
-#include "Handling_input.hpp"
+#include "../LSH/LSH.hpp"
 #include "../headers/read_file.hpp"
 
 using namespace std;
 
 string dir_input;
 
-extern int k; /* #LSH Functions */
-
-extern int L; /* #Hash Tables  */
+extern LSH *Lsh; /* LSH Object */
 
 // The dimension of the Data is the #integers an item has
 long int dim_data() {
@@ -73,7 +71,6 @@ void read_file(vector<vector<int>> &vec,string input_file){
             //cout << columns;
             rows++;
         }
-        cout << rows << endl;
         
     }else cout << "Unable to open file"; 
     Data_File.close();
@@ -107,7 +104,7 @@ bool number_operation(char ** str,char *str2,int *num,int i){
 
 vector<vector<int>> store_data(int argc,char** argv){
     string input_file,query_file,output_file;
-    int N,R;
+    int N, R, k, L;
 
     if(argc!=7 && argc != 15){
         cout << "Error in command line arguments:" << endl;
@@ -119,19 +116,19 @@ vector<vector<int>> store_data(int argc,char** argv){
     int i=1;
     
     if(argc == 7){//no param arguments
-        if(string_operation(argv,"-i",input_file,i) == false){
+        if(string_operation(argv,"-i", input_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return {};
         }
 
         i=i+2;
-        if(string_operation(argv,"-q",query_file,i) == false){
+        if(string_operation(argv,"-q", query_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return {};
         }
 
         i=i+2;
-        if(string_operation(argv,"-o",output_file,i) == false){
+        if(string_operation(argv,"-o", output_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return {};
         }
@@ -141,20 +138,20 @@ vector<vector<int>> store_data(int argc,char** argv){
         R=10000;
     }else if(argc == 15){ //param arguments
         
-        if(string_operation(argv,"-i",input_file,i) == false){
+        if(string_operation(argv,"-i", input_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return {};
         }
 
         i=i+2;
 
-        if(string_operation(argv,"-q",query_file,i) == false){
+        if(string_operation(argv,"-q", query_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return {};
         }
 
         i=i+2;
-        if(number_operation(argv,"-k", &k, i) == false){
+        if(number_operation(argv,"-k",  &k, i) == false){
             cout << "Program exiting due to error ..." << endl;
             return {};
         }
@@ -186,6 +183,8 @@ vector<vector<int>> store_data(int argc,char** argv){
     } 
     vector<vector<int>> vec;
     read_file(vec,input_file);
+
+    Lsh = new LSH(input_file, query_file, output_file, L, N, k, R, num_of_points(), dim_data());
 
     return vec;
 }

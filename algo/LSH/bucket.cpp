@@ -8,8 +8,8 @@ void Bucket::add(int* point,unsigned int g_i)
 //Fill hashtables with Points (data structure initialization) for LSH.
 void LSH_Insert_Points_To_Buckets(LSH* info){
     //Allocate memory so as to store temporarily g_i values
-    unsigned int points_num = info->get_PointsNum();
-    unsigned int L_var = info->get_L();
+    long long int points_num = info->get_PointsNum();
+    int L_var = info->get_L();
     unsigned int** g_i = new unsigned int*[points_num];
     for(int i=0;i<points_num;i++) {
         g_i[i] = new unsigned int[L_var];
@@ -58,4 +58,4 @@ void LSH_Insert_Points_To_Buckets(LSH* info){
 //         }
 //         info->get_tTrue()[i] = chrono::duration_cast<chrono::microseconds>(end - start).count();  
 //     }
-}
+// }
