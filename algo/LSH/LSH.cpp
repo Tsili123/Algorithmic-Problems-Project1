@@ -6,7 +6,7 @@ extern LSH *Lsh; /* LSH Object */
 
 void Print_values() {
     cout << "L: " << Lsh->get_L() << endl << "k: " << Lsh->get_k() << endl;
-    cout << "dimensions: " << dimension << endl << "number of items: " << n << endl;
+    cout << "dimensions: " << Lsh->get_dimension() << endl << "number of items: " << Lsh->get_PointsNum() << endl;
 
     /* Print vector v */
     // for (auto vec: v) {
@@ -30,11 +30,6 @@ long long int mod(long long int value, long long int Mod) {
         return (unsigned int) (value % Mod);
 }
 
-void Initialize_Hash_parameters() {
-    dimension = dim_data();
-    n = num_of_points();
-}
-
 double Normal_distribution() {
     // Inspired from https://en.cppreference.com/w/cpp/numeric/random/normal_distribution
     random_device rd{};
@@ -48,18 +43,18 @@ double Normal_distribution() {
 
 void Euclidean_Hash_Function(int L, int k) {
     // Initialize the vectors used for hashing
-    v.resize(k, vector<double>(dimension));
+    v.resize(k, vector<double>(Lsh->get_dimension()));
 
     for(int i=0; i < k; i++) {
         v[i].clear();
 
-		for(int j=0; j < dimension; j++){
+		for(int j=0; j < Lsh->get_dimension(); j++){
 			v[i].push_back(Normal_distribution());
 		}
     }
 
     // Initialize w (change it to your liking)
-    w = 400;
+    Lsh->set_w(400);
 
     srand(time(0));
 
@@ -68,7 +63,7 @@ void Euclidean_Hash_Function(int L, int k) {
     t.clear();
 
 	random_device generator;
-	uniform_real_distribution<float> dis(0.0, (float) w);
+	uniform_real_distribution<float> dis(0.0, (float) Lsh->get_w());
 
 	for(int i=0; i<k; i++){ 	// For every hash function
 		float random = dis(generator);
@@ -110,20 +105,20 @@ void Calculate_Hash_Value(int L, int k, vector<int> item) {
         for (int h = 0; h < k; h++) {
             int sum = 0;
             /* The inner product is calculated by multiplying all the coordinates of 2 vectors and summing them*/
-            for (int dim = 1; dim < dimension; dim++) {
+            for (int dim = 1; dim < Lsh->get_dimension(); dim++) {
                 sum += item[dim] * v[h][dim];
             }
 
             sum += t[h];
-            sum = floor(sum / (double) w);
+            sum = floor(sum / (double) Lsh->get_w());
             hash_value += sum * Hash_Functions[g][h];
             hash_value = mod(hash_value, M);
         }
 
         ID = hash_value;
 
-        hash_value = mod(hash_value, n/4);
-        // cout << "for table " << g << " hash value is " << hash_value << endl;
+        hash_value = mod(hash_value, Lsh->get_PointsNum()/4);
+        cout << "for table " << g << " hash value is " << hash_value << endl;
     }
 }
 
@@ -149,8 +144,9 @@ long long int euclidean_dis(vector<int> vec1, vector<int> vec2) {
 	return dist;
 }
 
-LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_)
-        :input_file(input), query_file(query), output_file(output), L(L_), N(N_), k(k_), R(R_)
+/* Initialize the variables used by the hash function */
+LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_, long long int n, int dim)
+        :input_file(input), query_file(query), output_file(output), L(L_), N(N_), k(k_), R(R_), points_num(n), dimension(dim)
     {}
 
 

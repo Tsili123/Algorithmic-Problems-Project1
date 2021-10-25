@@ -184,7 +184,7 @@ vector<vector<int>> store_data(int argc,char** argv){
     vector<vector<int>> vec;
     read_file(vec,input_file);
 
-    Lsh = new LSH(input_file, query_file, output_file, L, N, k, R);
+    Lsh = new LSH(input_file, query_file, output_file, L, N, k, R, num_of_points(), dim_data());
 
     return vec;
 }

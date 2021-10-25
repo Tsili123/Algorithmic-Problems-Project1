@@ -1,7 +1,9 @@
 #ifndef BUCKET_H
 #define BUCKET_H
 
-#include "../headers/read_binary_file.h"
+// #include "../headers/read_binary_file.h"
+#include "LSH.hpp"
+#include "Bucket.hpp"
 
 class Bucket
 {
@@ -10,9 +12,6 @@ class Bucket
 
         void add(int*,unsigned int);
 };
-
-
-void Bucket::add(int* point,unsigned int g_i);
 
 void LSH_Insert_Points_To_Buckets(LSH* info);
 
