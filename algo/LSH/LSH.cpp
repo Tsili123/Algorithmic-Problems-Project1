@@ -2,8 +2,10 @@
 
 using namespace std;
 
-void Print_values(int L, int k) {
-    cout << "L: " << L << endl << "k: " << k << endl;
+extern LSH *Lsh; /* LSH Object */
+
+void Print_values() {
+    cout << "L: " << Lsh->get_L() << endl << "k: " << Lsh->get_k() << endl;
     cout << "dimensions: " << dimension << endl << "number of items: " << n << endl;
 
     /* Print vector v */
@@ -84,16 +86,19 @@ void Euclidean_Hash_Function(int L, int k) {
         do{
 			int r_value = rand() % k;
 
-            auto itA = Hash_Functions[i].begin();
+            // auto itA = Hash_Functions[i].begin();
 
-            while(itA != Hash_Functions[i].end()) {
-                if (r_value == itA[0]) break;
-                if (itA != Hash_Functions[i].end()) ++itA;
-                else {
-                    Hash_Functions[i].push_back(r_value);
-                    j++;
-                }
-            }
+            // while(itA != Hash_Functions[i].end()) {
+            //     if (r_value == itA[0]) break;
+            //     if (itA != Hash_Functions[i].end()) ++itA;
+            //     else {
+            //         Hash_Functions[i].push_back(r_value);
+            //         j++;
+            //         break;
+            //     }
+            // }
+            Hash_Functions[i].push_back(r_value);
+            j++;
 		}while(j < k);
 	}
 }
@@ -144,50 +149,10 @@ long long int euclidean_dis(vector<int> vec1, vector<int> vec2) {
 	return dist;
 }
 
-int LSH::get_dimensions()
-{
-    return dimensions;
-}
+LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_)
+        :input_file(input), query_file(query), output_file(output), L(L_), N(N_), k(k_), R(R_)
+    {}
 
-int LSH::get_M()
-{
-    return M;
-}
-
-int LSH::get_N()
-{
-    return N;
-}
-
-int LSH::get_k()
-{
-    return k;
-}
-
-int LSH::get_L()
-{
-    return L;
-}
-
-int LSH::get_W()
-{
-    return W;
-}
-
-int LSH::get_HashTableSize()
-{
-    return HashTableSize;
-}
-
-int LSH::get_PointsNum()
-{
-    return points_num;
-}
-
-int LSH::get_QueriesNum()
-{
-    return queries_num;
-}
 
 // int* LSH::get_modulars()
 // {
@@ -209,17 +174,17 @@ int LSH::get_QueriesNum()
 //     return True_Distances;
 // }
 
-int** LSH::get_PointsArray()
-{
-    return points_array;
-}
+// int** LSH::get_PointsArray()
+// {
+//     return points_array;
+// }
 
-int** LSH::get_QueriesArray()
-{
-    return queries_array;
-}
+// int** LSH::get_QueriesArray()
+// {
+//     return queries_array;
+// }
 
-Bucket*** LSH::get_HashTables()
-{
-    return hashtables;
-}
+// Bucket*** LSH::get_HashTables()
+// {
+//     return hashtables;
+// }

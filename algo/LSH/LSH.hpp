@@ -24,7 +24,9 @@ class Bucket;
 
 class LSH{
     private:
-        int points_num,queries_num,k,L,R,dimensions,W,N,m,M,HashTableSize;
+        int k; /* #LSH Functions */
+        int L; /* #Hash Tables  */
+        int points_num,queries_num,R,dimension,W,N,m,HashTableSize;
         // int* modulars;
         // double *tLSH,*tTrue,dist_AF,time_error;
         // int **s_i,**True_Distances;
@@ -33,25 +35,21 @@ class LSH{
         string input_file,query_file,output_file;
         fstream file;
     public:
+        LSH(string, string, string, int L_,int N_,int k_,int R_);
+        ~LSH();
         Bucket*** get_HashTables();
         int** get_QueriesArray();
         int** get_PointsArray();
-        int get_QueriesNum();
-        int get_PointsNum();
-        int get_HashTableSize();
-        int get_W();
-        int get_L();
-        int get_k();
-        int get_N();
-        int get_M();
-        int get_dimensions();
+        int get_QueriesNum() { return queries_num; }
+        int get_PointsNum() { return points_num; }
+        int get_HashTableSize() { return HashTableSize; }
+        int get_W() { return W; }
+        int get_L() { return L; }
+        int get_k() { return k; }
+        int get_N() { return N; }
+        // int get_M() { return M; }
+        int get_dimension() { return dimension; }
 };
-
-LSH(string input_file_,string query_file_,string output_file_,int L_,int N_,int k_,int R_)
-        :input_file(input_file_),query_file(query_file_),output_file(output_file_),L(L_),N(N_),k(k_),R(R_),dist_AF(0.0)
-    {}
-
-
 
 static vector<vector <double>> v; /* Vectors with random normal numbers, used for hashfunction */
 
@@ -79,7 +77,7 @@ void Calculate_Hash_Value(int L, int k, vector<int> item);
 
 long long int mod(long long int);
 
-void Print_values(int L, int k); /* Used for Debugging */
+void Print_values(); /* Used for Debugging */
 
 long long int euclidean_dis(vector<int> , vector<int> );
 
