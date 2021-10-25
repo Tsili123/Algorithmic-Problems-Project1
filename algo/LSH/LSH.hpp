@@ -40,9 +40,11 @@ class LSH{
         // int **s_i,**True_Distances;
         int **points_array,**queries_Array;
         Bucket*** hashtables;
-        string input_file,query_file,output_file;
         fstream file;
     public:
+        string input_file, query_file, output_file;
+        vector<vector<int>> data; // Input Data
+
         LSH(string, string, string, int L_, int N_, int k_, int R_, long long int n, int dim);
         ~LSH();
         Bucket*** get_HashTables();
@@ -81,6 +83,12 @@ void Print_values(); /* Used for Debugging */
 
 long long int euclidean_dis(vector<int> , vector<int> );
 
-void Search_by_range();
+int Nearest_N_brute(vector<int> );
+
+vector<int> Brute_by_range(vector<int> );
+
+vector<int> Nearest_N_search(vector<int> );
+
+vector<int> Search_by_range(vector<int> );
 
 #endif

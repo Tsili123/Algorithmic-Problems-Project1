@@ -188,7 +188,7 @@ vector<int> Nearest_N_search(vector<int> query) {
 
         if (euc_dist < d) {
             d = euc_dist;
-            b = query.front();
+            // b = item_from_bucket.front();
             if (none_of(near_items.begin(), near_items.end(), [b](int item) { return b == item; })) {
                 if (near_items.size() == N) near_items.erase(near_items.begin());
                 near_items.push_back(b);
@@ -214,10 +214,47 @@ vector<int> Search_by_range(vector<int> query) {
         int euc_dist; // = euclidean_dis(item_from_bucket, query);
 
         if (euc_dist < R) {
-            int index = query.front();
-            if (none_of(near_items.begin(), near_items.end(), [index](int item) { return index == item; })) {
-                near_items.push_back(index);
-            }
+            // int index = item_from_bucket.front();
+            // if (none_of(near_items.begin(), near_items.end(), [index](int item) { return index == item; })) {
+            //     near_items.push_back(index);
+            // }
+        }
+    }
+
+    return near_items;
+}
+
+int Nearest_N_brute(vector<int> query) {
+    long int d = M; // Minimum distance
+    long int b = -1; // Closest item so far
+
+    for (auto Item: Lsh->data) {
+        if (Item == query) continue;
+        int euc_dist = euclidean_dis(Item, query);
+
+        if (euc_dist < d) {
+            d = euc_dist;
+            b = Item.front();
+        }
+    }
+
+    return b;
+}
+
+vector<int> Brute_by_range(vector<int> query) {
+    int L = Lsh->get_L();
+    int k = Lsh->get_k();
+    int R = Lsh->get_R();
+
+    vector<int> near_items;
+
+    for (auto Item: Lsh->data) {
+        if (Item == query) continue;
+        int euc_dist = euclidean_dis(Item, query);
+
+        if (euc_dist < R) {
+            int index = Item.front();
+            near_items.push_back(index);
         }
     }
 
