@@ -81,7 +81,7 @@ long long int mod(long long int);
 
 void Print_values(); /* Used for Debugging */
 
-long long int euclidean_dis(vector<int> , vector<int> );
+long double euclidean_dis(vector<int> , vector<int> );
 
 int Nearest_N_brute(vector<int> );
 
