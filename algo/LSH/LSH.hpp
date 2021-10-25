@@ -1,3 +1,6 @@
+#ifndef LSH_H
+#define LSH_H
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -15,6 +18,40 @@
 #include "../Handling_input/Handling_input.hpp"
 
 using namespace std;
+
+//Forward declaration
+class Bucket;
+
+class LSH{
+    private:
+        int points_num,queries_num,k,L,R,dimensions,W,N,m,M,HashTableSize;
+        // int* modulars;
+        // double *tLSH,*tTrue,dist_AF,time_error;
+        // int **s_i,**True_Distances;
+        int **points_array,**queries_Array;
+        Bucket*** hashtables;
+        string input_file,query_file,output_file;
+        fstream file;
+    public:
+        Bucket*** get_HashTables();
+        int** get_QueriesArray();
+        int** get_PointsArray();
+        int get_QueriesNum();
+        int get_PointsNum();
+        int get_HashTableSize();
+        int get_W();
+        int get_L();
+        int get_k();
+        int get_N();
+        int get_M();
+        int get_dimensions();
+};
+
+LSH(string input_file_,string query_file_,string output_file_,int L_,int N_,int k_,int R_)
+        :input_file(input_file_),query_file(query_file_),output_file(output_file_),L(L_),N(N_),k(k_),R(R_),dist_AF(0.0)
+    {}
+
+
 
 static vector<vector <double>> v; /* Vectors with random normal numbers, used for hashfunction */
 
@@ -45,3 +82,5 @@ long long int mod(long long int);
 void Print_values(int L, int k); /* Used for Debugging */
 
 long long int euclidean_dis(vector<int> , vector<int> );
+
+#endif

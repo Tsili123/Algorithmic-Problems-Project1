@@ -143,3 +143,83 @@ long long int euclidean_dis(vector<int> vec1, vector<int> vec2) {
 
 	return dist;
 }
+
+int LSH::get_dimensions()
+{
+    return dimensions;
+}
+
+int LSH::get_M()
+{
+    return M;
+}
+
+int LSH::get_N()
+{
+    return N;
+}
+
+int LSH::get_k()
+{
+    return k;
+}
+
+int LSH::get_L()
+{
+    return L;
+}
+
+int LSH::get_W()
+{
+    return W;
+}
+
+int LSH::get_HashTableSize()
+{
+    return HashTableSize;
+}
+
+int LSH::get_PointsNum()
+{
+    return points_num;
+}
+
+int LSH::get_QueriesNum()
+{
+    return queries_num;
+}
+
+// int* LSH::get_modulars()
+// {
+//     return modulars;
+// }
+
+// int** LSH::get_s_i()
+// {
+//     return s_i;
+// }
+
+// double* LSH::get_tTrue()
+// {
+//     return tTrue;
+// }
+
+// int** LSH::get_True_Distances()
+// {
+//     return True_Distances;
+// }
+
+int** LSH::get_PointsArray()
+{
+    return points_array;
+}
+
+int** LSH::get_QueriesArray()
+{
+    return queries_array;
+}
+
+Bucket*** LSH::get_HashTables()
+{
+    return hashtables;
+}
