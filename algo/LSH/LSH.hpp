@@ -34,7 +34,8 @@ class LSH{
         int dimension;
         int w;
 
-        int queries_num,R,N,m,HashTableSize;
+        int queries_num,R,N,m;
+        long int hashtable_size;
         // int* modulars;
         // double *tLSH,*tTrue,dist_AF,time_error;
         // int **s_i,**True_Distances;
@@ -47,20 +48,16 @@ class LSH{
 
         LSH(string, string, string, int L_, int N_, int k_, int R_, long long int n, int dim);
         ~LSH();
-        Bucket*** get_HashTables();
-        int** get_QueriesArray();
-        int** get_PointsArray();
-        int get_QueriesNum() { return queries_num; }
-        int get_PointsNum() { return points_num; }
-        int get_HashTableSize() { return HashTableSize; }
+        int get_queriesnum() { return queries_num; }
+        int get_pointsnum() { return points_num; }
+        int get_hashtablesize() { return hashtablesize; }
         int get_w() { return w; }
         int get_L() { return L; }
         int get_k() { return k; }
         int get_N() { return N; }
         int get_R() { return R; }
-        // int get_M() { return M; }
         int get_dimension() { return dimension; }
-
+        Bucket*** LSH::get_hashtables(){ return hashtables;}
         void set_w(int value) { w = value; }
 };
 
@@ -84,6 +81,8 @@ void Print_values(); /* Used for Debugging */
 long double euclidean_dis(vector<int> , vector<int> );
 
 int Nearest_N_brute(vector<int> );
+
+long int Specific_Hash_Value(int g, vector<int> item);
 
 vector<int> Brute_by_range(vector<int> );
 

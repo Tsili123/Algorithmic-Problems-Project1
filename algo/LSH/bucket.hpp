@@ -8,9 +8,9 @@
 class Bucket
 {
     public:
-        vector<pair<int*,unsigned int>> points;     
+        vector<pair<int,unsigned int>> points;     
 
-        void add(int*,unsigned int);
+        void add(int,unsigned int,long int);
 };
 
 void LSH_Insert_Points_To_Buckets(LSH* info);

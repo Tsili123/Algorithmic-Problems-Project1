@@ -6,6 +6,21 @@ using std::chrono::duration;
 
 extern LSH *Lsh; /* LSH Object */
 
+/* Initialize the variables used by the hash function */
+LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_, long long int n, int dim)
+        :input_file(input), query_file(query), output_file(output), L(L_), N(N_), k(k_), R(R_), points_num(n), dimension(dim)
+    {
+        hashtable_size = N/4;
+         //Declaration of hash tables...
+        hashtables = new Bucket**[L];
+        for(int i=0;i<L;i++)    
+        {
+            hashtables[i] = new Bucket*[hashtable_size];
+            for(int j=0;j<hashtable_size;j++)   hashtables[i][j] = NULL;                
+        }
+    }
+
+
 void Print_values() {
     cout << "L: " << Lsh->get_L() << endl << "k: " << Lsh->get_k() << endl;
     cout << "dimensions: " << Lsh->get_dimension() << endl << "number of items: " << Lsh->get_PointsNum() << endl;
@@ -150,7 +165,7 @@ long double euclidean_dis(vector<int> vec1, vector<int> vec2) {
 }
 
 // Return the hash value for a specific query in a table
-int Specific_Hash_Value(int g, vector<int> item) {
+long int Specific_Hash_Value(int g, vector<int> item) {
     int L = Lsh->get_L();
     int k = Lsh->get_k();
 
@@ -169,7 +184,7 @@ int Specific_Hash_Value(int g, vector<int> item) {
         hash_value = mod(hash_value, M);
     }
 
-    return mod(hash_value, Lsh->get_PointsNum()/4);
+    return mod(hash_value, Lsh->get_()/4);
 }
 
 vector<int> Nearest_N_search(vector<int> query) {
@@ -285,11 +300,6 @@ vector<int> Brute_by_range(vector<int> query) {
     return near_items;
 }
 
-/* Initialize the variables used by the hash function */
-LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_, long long int n, int dim)
-        :input_file(input), query_file(query), output_file(output), L(L_), N(N_), k(k_), R(R_), points_num(n), dimension(dim)
-    {}
-
 
 // int* LSH::get_modulars()
 // {
@@ -311,17 +321,3 @@ LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_,
 //     return True_Distances;
 // }
 
-// int** LSH::get_PointsArray()
-// {
-//     return points_array;
-// }
-
-// int** LSH::get_QueriesArray()
-// {
-//     return queries_array;
-// }
-
-// Bucket*** LSH::get_HashTables()
-// {
-//     return hashtables;
-// }

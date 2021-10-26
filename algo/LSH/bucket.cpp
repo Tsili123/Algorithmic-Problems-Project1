@@ -1,14 +1,14 @@
 #include "bucket.hpp"
 
-void Bucket::add(int* point,unsigned int g_i)
+void Bucket::add(int point_id,unsigned int g_i,long int hash_id)
 {
-    points.push_back(make_pair(point,g_i));
+    points.push_back(make_pair(point_id,g_i,hash_id));
 }
 
 //Fill hashtables with Points (data structure initialization) for LSH.
 void LSH_Insert_Points_To_Buckets(LSH* info){
     //Allocate memory so as to store temporarily g_i values
-    long long int points_num = info->get_PointsNum();
+    long long int points_num = info->get_pointsnum();
     int L_var = info->get_L();
     unsigned int** g_i = new unsigned int*[points_num];
     for(int i=0;i<points_num;i++) {
@@ -18,14 +18,14 @@ void LSH_Insert_Points_To_Buckets(LSH* info){
     }
 
     //Call function so as to compute all g_i values
-    //gi_values_of_train(info,g_i);
+    gi_values_of_train(info,g_i);
     
     //Fill buckets of Hash_Table
     for(int i=0;i<points_num;i++){
         for(int j=0;j<L_var;j++){
-            if(info->get_HashTables()[j][g_i[i][j]]==NULL)  
-                info->get_HashTables()[j][g_i[i][j]] = new Bucket();
-            info->get_HashTables()[j][g_i[i][j]]->add(info->get_PointsArray()[i],g_i[i][j]);    
+            if(info->get_hashtables()[j][g_i[i][j]]==NULL)  
+                info->get_hashtables()[j][g_i[i][j]] = new Bucket();
+            info->get_hashtables()[j][g_i[i][j]]->add([info->data[i][0],g_i[i][j]);    
         }
     }
     //Deallocation of memory
