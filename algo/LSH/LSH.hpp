@@ -19,8 +19,14 @@
 
 using namespace std;
 
-//Forward declaration
-class Bucket;
+class Bucket
+{
+    public:
+        vector<pair<pair<long long int, long long int>, long int>> points;     
+
+        void add(long long int, long int, long long int);
+
+};
 
 class LSH{
     private:
@@ -36,30 +42,36 @@ class LSH{
 
         int queries_num,R,N,m;
         long int hashtable_size;
+        Bucket*** hashtables;
         // int* modulars;
         // double *tLSH,*tTrue,dist_AF,time_error;
         // int **s_i,**True_Distances;
-        int **points_array,**queries_Array;
-        Bucket*** hashtables;
         fstream file;
     public:
         string input_file, query_file, output_file;
         vector<vector<int>> data; // Input Data
+        vector<vector<int>> queries_data; // Input Data
 
         LSH(string, string, string, int L_, int N_, int k_, int R_, long long int n, int dim);
         ~LSH();
         int get_queriesnum() { return queries_num; }
         int get_pointsnum() { return points_num; }
-        int get_hashtablesize() { return hashtablesize; }
+        long int get_hashtablesize() { return hashtable_size; }
         int get_w() { return w; }
         int get_L() { return L; }
         int get_k() { return k; }
         int get_N() { return N; }
         int get_R() { return R; }
         int get_dimension() { return dimension; }
-        Bucket*** LSH::get_hashtables(){ return hashtables;}
+        Bucket*** get_hashtables(){ return hashtables; }
         void set_w(int value) { w = value; }
+
+        vector<long long int> Specific_Hash_Value(int g, vector<int> item);
+
+        void print_buckets();
 };
+
+void LSH_Insert_Points_To_Buckets(LSH* info);
 
 static vector<vector <double>> v; /* Vectors with random normal numbers, used for hashfunction */
 
@@ -74,15 +86,13 @@ void Euclidean_Hash_Function(int L, int k); /* Here we initialize all vectors */
 
 void Calculate_Hash_Value(int L, int k, vector<int> item);
 
-long long int mod(long long int);
+long long int mod(long long int, long int);
 
 void Print_values(); /* Used for Debugging */
 
 long double euclidean_dis(vector<int> , vector<int> );
 
 int Nearest_N_brute(vector<int> );
-
-long int Specific_Hash_Value(int g, vector<int> item);
 
 vector<int> Brute_by_range(vector<int> );
 

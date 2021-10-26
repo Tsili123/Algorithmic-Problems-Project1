@@ -1,4 +1,4 @@
-#include "./LSH/LSH.hpp"
+#include "./LSH/bucket.hpp"
 
 using namespace std;
 
@@ -8,7 +8,11 @@ int main(int argc, char *argv[]) {
 
     Lsh->data = store_data(argc, argv);
 
+    read_file(Lsh->queries_data, Lsh->query_file);
+
     Euclidean_Hash_Function(Lsh->get_L(), Lsh->get_k());
+
+    LSH_Insert_Points_To_Buckets(Lsh);
 
     // int counter = 0;
 
@@ -22,13 +26,13 @@ int main(int argc, char *argv[]) {
     //     counter++;
     // }
 
-    vector<vector<int>> q_vec;
-    
-    read_file(q_vec, Lsh->query_file);
-
-    cout << Nearest_N_brute(q_vec.front()) << endl;
+    for (auto v: Nearest_N_search(Lsh->queries_data[10])) {
+        cout << v << endl;
+    }
+    int point = Nearest_N_brute(Lsh->queries_data[10]);
+    cout << "BRUTE NEAREST POINT: " << point << endl;
     // cout << euclidean_dis(Lsh->data[0], Lsh->data[2]) << endl;
     // cout << euclidean_dis(Lsh->data[3], Lsh->data[4]) << endl;
 
-    Print_values();
+    // Print_values();
 }
