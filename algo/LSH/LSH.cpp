@@ -252,7 +252,7 @@ vector<int> Nearest_N_search(vector<int> query) {
 
     duration<double, std::milli> ANN_time = end - begin;
 
-    cout << "NN TIME: " << ANN_time.count() << endl;
+    cout << "ANN TIME: " << ANN_time.count() << endl;
 
     return near_items;
 }
