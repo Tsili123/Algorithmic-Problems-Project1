@@ -1,6 +1,8 @@
 #include "LSH.hpp"
 
 using namespace std;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration;
 
 extern LSH *Lsh; /* LSH Object */
 
@@ -180,6 +182,8 @@ vector<int> Nearest_N_search(vector<int> query) {
 
     vector<int> near_items;
 
+    auto begin = high_resolution_clock::now();
+
     for (int g = 0; g < L; g++) {
         int hash_value = Specific_Hash_Value(g, query);
         // For every item in the bucket {
@@ -202,6 +206,12 @@ vector<int> Nearest_N_search(vector<int> query) {
         // }
     }
 
+    auto end = high_resolution_clock::now();
+
+    duration<double, std::milli> ANN_time = begin - end;
+
+    cout << ANN_time.count() << endl;
+
     return near_items;
 }
 
@@ -211,6 +221,8 @@ vector<int> Search_by_range(vector<int> query) {
     int R = Lsh->get_R();
 
     vector<int> near_items;
+
+    auto begin = high_resolution_clock::now();
 
     for (int g = 0; g < L; g++) {
         int hash_value = Specific_Hash_Value(g, query);
@@ -224,6 +236,12 @@ vector<int> Search_by_range(vector<int> query) {
             // }
         }
     }
+
+    auto end = high_resolution_clock::now();
+
+    duration<double, std::milli> ASR_time = begin - end;
+
+    cout << ASR_time.count() << endl;
 
     return near_items;
 }
