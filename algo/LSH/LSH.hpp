@@ -87,8 +87,6 @@ class LSH {
 
 void LSH_Insert_Points_To_Buckets(LSH* info);
 
-// static vector<vector <int>> Hash_Functions;
-
 double Normal_distribution(); /* Generates a sequence of random normal numbers */
 
 long long int mod(long long int, long int);
@@ -103,6 +101,6 @@ vector<int> Brute_by_range(vector<int> );
 
 vector<pair<int, int>> Nearest_N_search(vector<int> );
 
-vector<int> Search_by_range(vector<int> );
+vector<pair<int, int>> Search_by_range(vector<int> );
 
 #endif

@@ -13,7 +13,7 @@ void LSH_Insert_Points_To_Buckets(LSH* info){
     unsigned int** g_i = new unsigned int*[points_num];
     for(int i=0;i<points_num;i++) {
         g_i[i] = new unsigned int[L_var];
-        for(int j=0;j<L_var;j++)  
+        for(int j=0;j<L_var;j++)
             g_i[i][j]=0;
     }
 
@@ -33,29 +33,3 @@ void LSH_Insert_Points_To_Buckets(LSH* info){
         delete [] g_i[i];
     delete [] g_i;
 }
-// InfoLSH
-// get_L();
-// get_PointsNum
-// get_HashTables()
-// get_PointsArray()[i]
-
-// //Search exhaustively for each query distance with each image of dataset so as to find best for LSH.
-// void ExhaustingNN(LSH* info)
-// {   
-//     for(int i=0;i<info->get_Num_of_Queries();i++)
-//     {
-//         auto start = chrono::high_resolution_clock::now(); 
-//         priority_queue<int, vector<int>, greater<int>> pq;
-
-//         for(int j=0;j<info->get_Num_of_Images();j++)
-//             pq.push(ManhattanDistance(info->get_Queries_Array()[i],info->get_Images_Array()[j],info->get_dimensions()));
-        
-//         auto end = chrono::high_resolution_clock::now(); 
-//         for(int k=0;k<info->get_N();k++)
-//         {
-//             info->get_True_Distances()[i][k] = pq.top();
-//             pq.pop();
-//         }
-//         info->get_tTrue()[i] = chrono::duration_cast<chrono::microseconds>(end - start).count();  
-//     }
-// }

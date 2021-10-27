@@ -34,7 +34,7 @@ LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_,
 
 void LSH::print_buckets() {
     for(int j=0; j < this->L; j++) {
-        for(long int i=0; i < this->hashtable_size - 2250; i++){
+        for(long int i=0; i < this->hashtable_size - 2498; i++){
             cout << "Table " << j << " in Bucket " << i << endl;
             int counter = 0;
             if (hashtables[j][i] != NULL) {
@@ -68,12 +68,14 @@ vector<long long int> LSH::Specific_Hash_Value(int g, vector<int> item) {
     long long int hash_value = 0;
     for (int h = 0; h < k; h++) {
         int sum = 0;
+        vector <double> v = Hash_Fun.get_vector_v()[h];
+        vector <double> t = Hash_Fun.get_vector_t();
         /* The inner product is calculated by multiplying all the coordinates of 2 vectors and summing them*/
         for (int dim = 1; dim < Lsh->get_dimension(); dim++) {
-            sum += item[dim] * Hash_Fun.get_vector_v()[h][dim];
+            sum += item[dim] * v[dim];
         }
 
-        sum += Hash_Fun.get_vector_t()[h];
+        sum += t[h];
         sum = floor(sum / (double) Lsh->get_w());
         hash_value += sum * r[h];
         hash_value = mod(hash_value, M);
@@ -206,7 +208,6 @@ vector<pair<int, int>> Nearest_N_search(vector<int> query) {
                     if (none_of(near_items.begin(), near_items.end(), [b](pair<int, int> item) { return b == item.second; })) {
                         near_items.pop_back();
                         near_items.insert(near_items.begin(), make_pair(d, b));
-                        cout << near_items.size() << endl;
                     }
                 } else {
                     d = euc_dist;
@@ -228,31 +229,39 @@ vector<pair<int, int>> Nearest_N_search(vector<int> query) {
     return near_items;
 }
 
-vector<int> Search_by_range(vector<int> query) {
+vector<pair<int, int>> Search_by_range(vector<int> query) {
+    long int iterations = 0; // When it reaches 10L stop
     int L = Lsh->get_L();
     int k = Lsh->get_k();
     int R = Lsh->get_R();
 
-    vector<int> near_items;
+    vector<pair<int, int>> near_items;
 
     auto begin = high_resolution_clock::now();
 
+    Bucket *** buckets = Lsh->get_hashtables();
+
     for (int g = 0; g < L; g++) {
         vector<long long int> hash_value = Lsh->Specific_Hash_Value(g, query);
-        // For every item in the bucket
-        long double euc_dist; // = euclidean_dis(item_from_bucket, query);
 
-        if (euc_dist < R) {
-            // int index = item_from_bucket.front();
-            // if (none_of(near_items.begin(), near_items.end(), [index](int item) { return index == item; })) {
-            //     near_items.push_back(index);
-            // }
+        iterations++;
+        if (buckets[g][hash_value[0]] == NULL) continue;
+        for (auto Points: buckets[g][hash_value[0]]->points) {
+            int index = Points.first.first;
+            long double euc_dist = euclidean_dis(Lsh->data[index], query);
+
+            if (euc_dist < R) {
+                if (none_of(near_items.begin(), near_items.end(), [index](pair<int, int> item) { return index == item.second; })) {
+                    near_items.insert(near_items.begin(), make_pair(euc_dist, index));
+                }
+            }
+            if (iterations == 10*L) break;
         }
     }
 
     auto end = high_resolution_clock::now();
 
-    duration<double, std::milli> ASR_time = begin - end;
+    duration<double, std::milli> ASR_time = end - begin;
 
     cout << ASR_time.count() << endl;
 
@@ -263,6 +272,8 @@ int Nearest_N_brute(vector<int> query) {
     long double d = (double) M; // Minimum distance
     long int b = -1; // Closest item so far
 
+    auto begin = high_resolution_clock::now();
+
     for (auto Item: Lsh->data) {
         if (Item == query) continue;
         long double euc_dist = euclidean_dis(Item, query);
@@ -272,6 +283,12 @@ int Nearest_N_brute(vector<int> query) {
             b = Item.front();
         }
     }
+
+    auto end = high_resolution_clock::now();
+
+    duration<double, std::milli> NNB_time = end - begin;
+
+    cout << "NNB TIME: " << NNB_time.count() << endl;
 
     cout << "BRUTE NEAREST DISTANCE: " << d << endl;
 
@@ -285,15 +302,23 @@ vector<int> Brute_by_range(vector<int> query) {
 
     vector<int> near_items;
 
+    auto begin = high_resolution_clock::now();
+
     for (auto Item: Lsh->data) {
         if (Item == query) continue;
         long double euc_dist = euclidean_dis(Item, query);
 
-        if (euc_dist < R) {
+        if (euc_dist <= R) {
             int index = Item.front();
             near_items.push_back(index);
         }
     }
+
+    auto end = high_resolution_clock::now();
+
+    duration<double, std::milli> BSBR_time = end - begin;
+
+    cout << "BSBR TIME: " << BSBR_time.count() << endl;
 
     return near_items;
 }
