@@ -250,7 +250,7 @@ vector<pair<int, int>> Search_by_range(vector<int> query) {
             int index = Points.first.first;
             long double euc_dist = euclidean_dis(Lsh->data[index], query);
 
-            if (euc_dist < R) {
+            if (euc_dist <= R) {
                 if (none_of(near_items.begin(), near_items.end(), [index](pair<int, int> item) { return index == item.second; })) {
                     near_items.insert(near_items.begin(), make_pair(euc_dist, index));
                 }
