@@ -28,7 +28,19 @@ class Bucket
 
 };
 
-class LSH{
+class Euclidean_Hash_Function {
+    private:
+        vector<vector <double>> v; /* Vectors with random normal numbers, used for hashfunction */
+        vector<double> t; // Vector with random numbers between 0 and w picked uniformly  
+    public:
+        Euclidean_Hash_Function() {};
+        Euclidean_Hash_Function(int k, int dim); /* Here we initialize all vectors */
+        ~Euclidean_Hash_Function(); 
+        vector<vector <double>> get_vector_v() { return v; }
+        vector<double> get_vector_t() { return t; }
+};
+
+class LSH {
     private:
         int k; /* #LSH Functions */
         int L; /* #Hash Tables  */
@@ -39,13 +51,14 @@ class LSH{
         // #Numbers in a vector of an item
         int dimension;
         int w;
+        vector<int> r;
 
         int queries_num,R,N,m;
         long int hashtable_size;
+        Euclidean_Hash_Function *Hash_Funs;
         Bucket*** hashtables;
-        // int* modulars;
-        // double *tLSH,*tTrue,dist_AF,time_error;
-        // int **s_i,**True_Distances;
+        // double *tLSH,dist_AF,time_error;
+        // int **s_i;
         fstream file;
     public:
         string input_file, query_file, output_file;
@@ -64,6 +77,7 @@ class LSH{
         int get_R() { return R; }
         int get_dimension() { return dimension; }
         Bucket*** get_hashtables(){ return hashtables; }
+        Euclidean_Hash_Function* get_hash_functions() { return Hash_Funs; }
         void set_w(int value) { w = value; }
 
         vector<long long int> Specific_Hash_Value(int g, vector<int> item);
@@ -73,18 +87,9 @@ class LSH{
 
 void LSH_Insert_Points_To_Buckets(LSH* info);
 
-static vector<vector <double>> v; /* Vectors with random normal numbers, used for hashfunction */
-
-static vector<vector <int>> Hash_Functions;
-
-// Vector with random numbers between 0 and w picked uniformly
-static vector<double> t;
+// static vector<vector <int>> Hash_Functions;
 
 double Normal_distribution(); /* Generates a sequence of random normal numbers */
-
-void Euclidean_Hash_Function(int L, int k); /* Here we initialize all vectors */
-
-void Calculate_Hash_Value(int L, int k, vector<int> item);
 
 long long int mod(long long int, long int);
 
@@ -96,7 +101,7 @@ int Nearest_N_brute(vector<int> );
 
 vector<int> Brute_by_range(vector<int> );
 
-vector<int> Nearest_N_search(vector<int> );
+vector<pair<int, int>> Nearest_N_search(vector<int> );
 
 vector<int> Search_by_range(vector<int> );
 

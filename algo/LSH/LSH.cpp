@@ -11,13 +11,25 @@ LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_,
         :input_file(input), query_file(query), output_file(output), L(L_), N(N_), k(k_), R(R_), points_num(n), dimension(dim)
     {
         hashtable_size = n/4;
+        w = 500;
+        Hash_Funs = new Euclidean_Hash_Function[L];
          //Declaration of hash tables...
         hashtables = new Bucket**[L];
-        for(int i=0;i<L;i++)  
-        {
+        for(int i=0;i<L;i++) {
+            Hash_Funs[i] = Euclidean_Hash_Function(k, dim);
             hashtables[i] = new Bucket*[hashtable_size];
             for(int j=0;j<hashtable_size;j++)   hashtables[i][j] = NULL;                
         }
+
+        // Every hash function uses a vector r length k
+
+        int j=0;
+
+        do {
+            int r_value = rand();
+            r.push_back(r_value);
+            j++;
+        }while(j < k);
     }
 
 void LSH::print_buckets() {
@@ -51,17 +63,19 @@ vector<long long int> LSH::Specific_Hash_Value(int g, vector<int> item) {
     int k = Lsh->get_k();
     long long int ID = -1;
 
+    Euclidean_Hash_Function Hash_Fun = Lsh->get_hash_functions()[g];
+
     long long int hash_value = 0;
     for (int h = 0; h < k; h++) {
         int sum = 0;
         /* The inner product is calculated by multiplying all the coordinates of 2 vectors and summing them*/
         for (int dim = 1; dim < Lsh->get_dimension(); dim++) {
-            sum += item[dim] * v[h][dim];
+            sum += item[dim] * Hash_Fun.get_vector_v()[h][dim];
         }
 
-        sum += t[h];
+        sum += Hash_Fun.get_vector_t()[h];
         sum = floor(sum / (double) Lsh->get_w());
-        hash_value += sum * Hash_Functions[g][h];
+        hash_value += sum * r[h];
         hash_value = mod(hash_value, M);
     }
 
@@ -85,10 +99,10 @@ void Print_values() {
     // }
 
     /* Print vector t */
-    cout << "vector t: ";
-    for (auto vec: t)
-        cout << vec << ", ";  
-    cout << endl;
+    // cout << "vector t: ";
+    // for (auto vec: t)
+    //     cout << vec << ", ";  
+    // cout << endl;
 
     Lsh->print_buckets();
 }
@@ -104,20 +118,20 @@ double Normal_distribution() {
     return round(d(gen));
 }
 
-void Euclidean_Hash_Function(int L, int k) {
+Euclidean_Hash_Function::Euclidean_Hash_Function(int k, int dim) {
     // Initialize the vectors used for hashing
-    v.resize(k, vector<double>(Lsh->get_dimension()));
+    v.resize(k, vector<double>(dim));
 
     for(int i=0; i < k; i++) {
         v[i].clear();
 
-		for(int j=0; j < Lsh->get_dimension(); j++){
+		for(int j=0; j < dim; j++){
 			v[i].push_back(Normal_distribution());
 		}
     }
 
     // Initialize w (change it to your liking)
-    Lsh->set_w(400);
+    int w = 500;
 
     srand(time(0));
 
@@ -126,64 +140,17 @@ void Euclidean_Hash_Function(int L, int k) {
     t.clear();
 
 	random_device generator;
-	uniform_real_distribution<float> dis(0.0, (float) Lsh->get_w());
+	uniform_real_distribution<float> dis(0.0, (float) w);
 
 	for(int i=0; i<k; i++){ 	// For every hash function
 		float random = dis(generator);
 		t.push_back(random);
 	}
-
-    // Every hash function has a vector length k (otherwise known as r)
-    Hash_Functions.resize(L, vector<int> (k));
-
-    for(int i = 0; i < L; i++){
-		Hash_Functions[i].clear();
-
-        int j=0;
-
-        do{
-			int r_value = rand();
-
-            // auto itA = Hash_Functions[i].begin();
-
-            // while(itA != Hash_Functions[i].end()) {
-            //     if (r_value == itA[0]) break;
-            //     if (itA != Hash_Functions[i].end()) ++itA;
-            //     else {
-            //         Hash_Functions[i].push_back(r_value);
-            //         j++;
-            //         break;
-            //     }
-            // }
-            Hash_Functions[i].push_back(r_value);
-            j++;
-		}while(j < k);
-	}
 }
 
-// Place the vector from the input file to a bucket
-void Calculate_Hash_Value(int L, int k, vector<int> item) {
-    for (int g = 0; g < L; g++) {
-        long long int hash_value = 0;
-        long int ID = -1;
-        for (int h = 0; h < k; h++) {
-            int sum = 0;
-            /* The inner product is calculated by multiplying all the coordinates of 2 vectors and summing them*/
-            for (int dim = 1; dim < Lsh->get_dimension(); dim++) {
-                sum += item[dim] * v[h][dim];
-            }
-
-            sum += t[h];
-            sum = floor(sum / (double) Lsh->get_w());
-            hash_value += sum * Hash_Functions[g][h];
-            hash_value = mod(hash_value, M);
-        }
-
-        ID = hash_value;
-
-        hash_value = mod(hash_value, Lsh->get_hashtablesize());
-        cout << "for table " << g << " hash value is " << hash_value << endl;
-    }
+Euclidean_Hash_Function::~Euclidean_Hash_Function() {
+    v.clear();
+    t.clear();
 }
 
 // Calculate Euclidean Distance
@@ -209,7 +176,7 @@ long double euclidean_dis(vector<int> vec1, vector<int> vec2) {
 	return sqrt(dist);
 }
 
-vector<int> Nearest_N_search(vector<int> query) {
+vector<pair<int, int>> Nearest_N_search(vector<int> query) {
     long double d = M; // Minimum distance
     long int iterations = 0; // When it reaches 10L stop
     long int b = -1; // Closest item so far
@@ -217,7 +184,7 @@ vector<int> Nearest_N_search(vector<int> query) {
     int L = Lsh->get_L();
     int N = Lsh->get_N();
 
-    vector<int> near_items;
+    vector<pair<int, int>> near_items;
 
     auto begin = high_resolution_clock::now();
 
@@ -232,17 +199,21 @@ vector<int> Nearest_N_search(vector<int> query) {
             int index = Points.first.first;
             long double euc_dist = euclidean_dis(Lsh->data[index], query);
 
-            if (euc_dist < d && near_items.size() == N) {
-                d = euc_dist;
-                b = index;
-                if (none_of(near_items.begin(), near_items.end(), [b](int item) { return b == item; })) {
-                    near_items.erase(near_items.begin());
-                    near_items.push_back(b);
+            if (euc_dist < d) {
+                if (near_items.size() >= N) {
+                    d = euc_dist;
+                    b = index;
+                    if (none_of(near_items.begin(), near_items.end(), [b](pair<int, int> item) { return b == item.second; })) {
+                        near_items.pop_back();
+                        near_items.insert(near_items.begin(), make_pair(d, b));
+                        cout << near_items.size() << endl;
+                    }
+                } else {
+                    d = euc_dist;
+                    b = index;
+                    near_items.push_back(make_pair(d, b));
+                    sort(near_items.begin(), near_items.end());
                 }
-            } else {
-                b = index;
-                near_items.push_back(b);
-                sort(near_items.begin(), near_items.end(), greater<int>());
             }
             if (iterations == 10*L) break;
         }
@@ -327,24 +298,8 @@ vector<int> Brute_by_range(vector<int> query) {
     return near_items;
 }
 
-
-// int* LSH::get_modulars()
-// {
-//     return modulars;
-// }
-
 // int** LSH::get_s_i()
 // {
 //     return s_i;
-// }
-
-// double* LSH::get_tTrue()
-// {
-//     return tTrue;
-// }
-
-// int** LSH::get_True_Distances()
-// {
-//     return True_Distances;
 // }
 
