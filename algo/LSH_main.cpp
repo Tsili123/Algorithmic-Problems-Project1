@@ -6,7 +6,7 @@ LSH *Lsh;
 
 int main(int argc, char *argv[]) {
 
-    Lsh->data = store_data(argc, argv);
+    Lsh->data = store_LSH_data(argc, argv);
 
     read_file(Lsh->queries_data, Lsh->query_file);
 

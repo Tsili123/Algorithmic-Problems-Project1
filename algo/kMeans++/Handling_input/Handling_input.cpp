@@ -1,11 +1,10 @@
-#include "../LSH/LSH.hpp"
-#include "../kMeans++/Cluster.hpp"
+#include "../Cluster.hpp"
 
 using namespace std;
 
-string dir_input = "";
+extern Cluster *cluster;
 
-extern LSH *Lsh; /* LSH Object */
+string dir_input = "";
 
 // The dimension of the Data is the #integers an item has
 long int dim_data() {
@@ -43,10 +42,6 @@ long int num_of_points() {
 	return num_of_lines;
 }
 
-//g++ -c -o main.o main.cpp
-//g++ -o lsh main.o
-// ./lsh -i input_small_id -q query_file -k 4 -L 5 -o output -N 1 -R 1000
-// ./lsh -i input_small_id -q query_file -k 4 -L 5 -o output -N 1 -R 1000
 void read_file(vector<vector<int>> &vec,string input_file){
     string line;
     if (dir_input == "") dir_input = input_file;
@@ -102,89 +97,55 @@ bool number_operation(char ** str,char *str2,int *num,int i){
     }
 }
 
-vector<vector<int>> store_LSH_data(int argc,char** argv){
-    string input_file,query_file,output_file;
-    int N, R, k, L;
+vector<vector<int>> store_Cluster_data(int argc,char** argv){
+    string input_file, configuration_file, output_file;
+    string Method;
+    int complete;
 
-    if(argc!=7 && argc != 15){
+    if(argc!=9 && argc != 11){
         cout << "Error in command line arguments:" << endl;
-        cout << "argc " << argc << endl;
         cout << "Program exiting due to error ..." << endl;
         return {};
     }
 
     int i=1;
     
-    if(argc == 7){//no param arguments
-        if(string_operation(argv,"-i", input_file,i) == false){
-            cout << "Program exiting due to error ..." << endl;
-            return {};
-        }
+    if(string_operation(argv, (char*) "-i", input_file,i) == false){
+        cout << "Program exiting due to error ..." << endl;
+        return {};
+    }
 
-        i=i+2;
-        if(string_operation(argv,"-q", query_file,i) == false){
-            cout << "Program exiting due to error ..." << endl;
-            return {};
-        }
+    i=i+2;
 
+    if(string_operation(argv, (char*) "-c", configuration_file,i) == false){
+        cout << "Program exiting due to error ..." << endl;
+        return {};
+    }
+
+    i=i+2;
+    if(string_operation(argv, (char*) "-o",output_file,i) == false){
+        cout << "Program exiting due to error ..." << endl;
+        return {};
+    }
+
+    if (argc == 11) {
         i=i+2;
-        if(string_operation(argv,"-o", output_file,i) == false){
+        if(number_operation(argv, (char*) "-complete", &complete,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return {};
         }
-        k=4;
-        L=5;
-        N=1;
-        R=10000;
-    }else if(argc == 15){ //param arguments
+    }
+
+    i=i+2;
+    if(string_operation(argv, (char*) "-m", Method,i) == false){
+        cout << "Program exiting due to error ..." << endl;
+        return {};
+    }        
         
-        if(string_operation(argv,"-i", input_file,i) == false){
-            cout << "Program exiting due to error ..." << endl;
-            return {};
-        }
-
-        i=i+2;
-
-        if(string_operation(argv,"-q", query_file,i) == false){
-            cout << "Program exiting due to error ..." << endl;
-            return {};
-        }
-
-        i=i+2;
-        if(number_operation(argv,"-k",  &k, i) == false){
-            cout << "Program exiting due to error ..." << endl;
-            return {};
-        }
-        
-        i=i+2;
-        if(number_operation(argv,"-L", &L,i) == false){
-            cout << "Program exiting due to error ..." << endl;
-            return {};
-        }
-
-        i=i+2;
-        if(string_operation(argv,"-o",output_file,i) == false){
-            cout << "Program exiting due to error ..." << endl;
-            return {};
-        }
-
-        i=i+2;
-        if(number_operation(argv,"-N", &N,i) == false){
-            cout << "Program exiting due to error ..." << endl;
-            return {};
-        }
-        
-        i=i+2;
-        if(number_operation(argv,"-R", &R,i) == false){
-            cout << "Program exiting due to error ..." << endl;
-            return {};
-        }
-
-    } 
     vector<vector<int>> vec;
     read_file(vec,input_file);
 
-    Lsh = new LSH(input_file, query_file, output_file, L, N, k, R, num_of_points(), dim_data());
+    cluster = new Cluster(input_file, configuration_file, output_file);
 
     return vec;
 }
