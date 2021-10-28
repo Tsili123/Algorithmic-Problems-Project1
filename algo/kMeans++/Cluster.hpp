@@ -15,31 +15,36 @@
 
 #include "./Handling_input/Handling_input.hpp"
 
+#define M 4294967291
+
 class Cluster {
     private:
         int L=3; // num of hash tables for LSH
         int k=4; // k of LSH
+        int num_of_Items;
         int number_of_clusters;
         int max_number_M_hypercube = 10;
         int number_of_hypercube_dimensions = 3;
         int number_of_probes = 2;
         string input_file, config_file, output_file;
+
+        // The centroids kMeans++ initialized
+        vector<int> centroids;
+        // The first vector is the centroid and the second is a vector of indexes
+        vector<pair<vector<int>, vector<int>>> Lloyd;
     public:
         vector<vector<int>> data; // Input data
+
+        void kMeanspp_Initialization();
 
         Cluster(string, string, string);
         ~Cluster();
 
         void read_config(string );
 
-        void print() {
-            cout << "number_of_clusters: " << number_of_clusters << endl;
-            cout << "number_of_vector_hash_tables: " << L << endl;
-            cout << "number_of_vector_hash_functions: " << k << endl;
-            cout << "max_number_M_hypercube: " << max_number_M_hypercube << endl;
-            cout << "number_of_hypercube_dimensions: " << number_of_hypercube_dimensions << endl;
-            cout << "number_of_probes: " << number_of_probes << endl;
-        }
+        void print();
 };
+
+long double euclidean_dis(vector<int> vec1, vector<int> vec2);
 
 #endif

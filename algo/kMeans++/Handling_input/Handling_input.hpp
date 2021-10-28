@@ -11,7 +11,7 @@ using namespace std;
 
 // long int dim_data(); /* Get the dimensions of the data */
 
-// long int num_of_points(); /* Get the number of the items */
+long int num_of_points(); /* Get the number of the items */
 
 void read_file(vector<vector<int>> &,string );
 vector<vector<int>> store_Cluster_data(int, char**);
