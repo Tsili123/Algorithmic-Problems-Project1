@@ -9,8 +9,74 @@
 #include <string>
 
 typedef std::vector<std::list<int>> hypercube_hashtable;
+Euclidean_H_i *H_i_ptr;
 
 template <typename T>
+
+class Euclidean_H_i {
+    private:
+        vector<vector <double>> v; /* Vectors with random normal numbers, used for hashfunction */
+        vector<double> t; // Vector with random numbers between 0 and w picked uniformly  
+		int w ;
+		long int *h_i;
+		int k;
+    public:
+        Euclidean_H_i_init(int k, int dimlim) {
+
+			h_i = new long int[k];
+			// Initialize the vectors used for hashing
+			v.resize(k, vector<double>(dimlim));
+
+			for(int i=0; i < k; i++) {
+				v[i].clear();
+
+				for(int j=0; j < dimlim; j++){
+					v[i].push_back(Normal_distribution());
+				}
+			}
+
+			// Initialize w (change it to your liking)
+			w = 500;
+
+			srand(time(0));
+
+			// Initialize vector t
+			// Inspired from https://en.cppreference.com/w/cpp/numeric/random/uniform_real_distribution
+			t.clear();
+
+			random_device generator;
+			uniform_real_distribution<float> dis(0.0, (float) w);
+
+			for(int i=0; i<k; i++){ 	// For every hash function
+				float random = dis(generator);
+				t.push_back(random);
+			}
+
+		}
+
+        ~Euclidean_Hash_Function(){
+    		v.clear();
+    		t.clear();
+		} 
+
+		Specific_H_i(vector<int> item) {
+			long int sum;
+			for (int var = 1; var < k; var++) {
+				for (int var2 = 1; var2 < dimlim; var2++) {
+            		sum += item[var2] * v[var2];
+        		}
+				sum += t[var];
+        		sum = floor(sum /w);
+				h[var] = sum;
+				sum=0;
+			}
+		}
+		
+        vector<vector <double>> get_vector_v() { return v; }
+        vector<double> get_vector_t() { return t; }
+		long int get_h_i(int pos){return h_i[pos];}
+};
+
 class Hypercube{
 	private:
     
@@ -55,7 +121,7 @@ class Hypercube{
             buckets_num = (int)pow(2, k);
 
             //Create hash functions for each bucket
-            LSH::Euclidean_Hash_Function hash_funcs(k,space);
+            Euclidean_H_i::Euclidean_Hi(k,space);
 
             // initialize the hypercube hashtable
             //every bucket contains a list of integers
@@ -69,10 +135,10 @@ class Hypercube{
 			// create the list of the f_i functions
 			for (int i = 0; i < k; i++) {
 				std::unordered_map<int,bool> current_map;
-				// pre-map all the possible hash function outcomes to 0-1, so we save time 
-				for (int i = 0; i < buckets_num; i++) {
+				// compute all the possible hash function outcomes to 0-1, so we save time 
+				for (int j = 0; j < buckets_num; j++) {
 					bool res = dist(gen);
-					current_map.insert({i, res});
+					current_map.insert({j, res});
 				}
 				flipped_coins.push_back(current_map);
 			}
@@ -91,15 +157,16 @@ class Hypercube{
 
 		~Hypercube(){};
 
-		int hypercube_hash(std::vector<int> vec_point) {
+		int hypercube_hash(std::vector<int> vec_point){
 			// store the string produced
 			std::string bucket_str;
 			// hash k times
 			for(int i=0;i<this->k;i++){
                     // hash with the i-th hash fn
-                    vector<long long int> res = LSH::Specific_Hash_Value(k,vec_point);
+					H_i_ptr->Specific_H_i(vec_point);
+                    long int res = H_i_ptr->get_h_i(k);
 					// find its pre-maped result of a coin flip
-					bool bit = flipped_coins[i][res[0]];
+					bool bit = flipped_coins[i][res];
 					// append the 0/1 value to the string
 					bucket_string += std::to_string(bit);
 			    }
