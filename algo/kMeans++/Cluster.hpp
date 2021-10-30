@@ -15,7 +15,7 @@
 
 #include "./Handling_input/Handling_input.hpp"
 
-#define M 4294967291
+#define NUM 1.79769e+308 // Biggest double num that can be defined
 
 class Cluster {
     private:
@@ -35,10 +35,12 @@ class Cluster {
     public:
         vector<vector<int>> data; // Input data
 
-        void kMeanspp_Initialization();
-
         Cluster(string, string, string);
         ~Cluster();
+
+        void kMeanspp_Initialization();
+        void Lloyd_method();
+        vector<int> Calculate_Mean(vector<int>);
 
         void read_config(string );
 
