@@ -141,6 +141,25 @@ vector<int> Cluster::Calculate_Mean(vector<int> near_points) {
     return centroid;
 }
 
+// This function compares all new clusters to their previous
+// if the clusters have not changed much then return false else return true
+bool Cluster::Compare(vector<vector<int>> previous_clusters) {
+    for (int centroid = 0; centroid < number_of_clusters; centroid++) {
+        int sum_of_diff_points = 0;
+        int size = previous_clusters[centroid].size();
+        for (int point = 0; point < size; point++) {
+            if (!(find(Lloyd[centroid].first.begin(), Lloyd[centroid].first.end(), previous_clusters[centroid][point]) != Lloyd[centroid].first.end())) {
+                sum_of_diff_points++;
+            }
+        }
+
+        // If 30% of the cluster has changed return true
+        double percentage = (double) sum_of_diff_points/(double) size;
+        cout << percentage << endl;
+        if (percentage >= 0.3) return true;
+    }
+}
+
 void Cluster::Lloyd_method() {
 
     vector<int> empty_vec;
@@ -151,7 +170,10 @@ void Cluster::Lloyd_method() {
 
     auto begin = high_resolution_clock::now();
 
+    vector<vector<int>> previous_clusters(number_of_clusters, empty_vec);
+    // previous_clusters.clear();
     // Do this until there is almost no difference to the centroids
+    while (Compare(previous_clusters)) {
         // Assign each point to its centroid
         for (int point = 0; point < num_of_Items; point++) {
             long double dis = (long double) NUM;
@@ -169,12 +191,20 @@ void Cluster::Lloyd_method() {
             }
         }
 
+        // Store previous clusters before Updating them
+        for (int i = 0; i < number_of_clusters; i++) {
+            previous_clusters[0] = Lloyd[0].first;
+        }
+
         // Update centroids
         for (auto centroid: Lloyd) {
             centroid.first = Calculate_Mean(centroid.second);
         }
 
-        // centroids.clear();
+        centroids.clear();
+
+        break;
+    }
 
     auto end = high_resolution_clock::now();
     duration<double, std::milli> time = end - begin;

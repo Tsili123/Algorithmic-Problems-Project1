@@ -41,6 +41,7 @@ class Cluster {
         void kMeanspp_Initialization();
         void Lloyd_method();
         vector<int> Calculate_Mean(vector<int>);
+        bool Compare(vector<vector<int>>);
 
         void read_config(string );
 
