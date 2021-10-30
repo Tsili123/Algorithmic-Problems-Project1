@@ -138,7 +138,7 @@ class Hypercube{
 				// compute all the possible hash function outcomes to 0-1, so we save time 
 				for (int j = 0; j < buckets_num; j++) {
 					bool res = dist(gen);
-					current_map.insert({j, res});
+					current_map.insert({i, res});
 				}
 				flipped_coins.push_back(current_map);
 			}
@@ -165,6 +165,7 @@ class Hypercube{
                     // hash with the i-th hash fn
 					H_i_ptr->Specific_H_i(vec_point);
                     long int res = H_i_ptr->get_h_i(k);
+					res = res % bucket_num;
 					// find its pre-maped result of a coin flip
 					bool bit = flipped_coins[i][res];
 					// append the 0/1 value to the string
