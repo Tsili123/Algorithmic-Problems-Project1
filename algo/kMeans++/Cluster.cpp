@@ -114,28 +114,17 @@ void Cluster::kMeanspp_Initialization() {
 
 vector<int> Cluster::Calculate_Mean(vector<int> near_points) {
     long int T = near_points.size();
-    vector<int> centroid(this->data[0].size(), 0);
+    int size = this->data[0].size();
+    vector<int> centroid(size, 0);
+    vector<long double> sum(size, 0.0);
     for (auto point: near_points) {
-        auto c_it = centroid.begin();
-        auto p_it = this->data[point].begin();
-        ++c_it;
-        ++p_it;
-        while(c_it != centroid.end() || p_it != this->data[point].end())
-        {
-            c_it[0] += p_it[0];
-            if(c_it != centroid.end()) {
-                ++c_it;
-            }
-            if(p_it != this->data[point].end()) {
-                ++p_it;
-            }
+        for(int i = 0; i < size; i++) {
+            sum[i] += (long double) this->data[point][i];
         }
     }
 
-    auto c_it = centroid.begin();
-    while (c_it != centroid.end()) {
-        c_it[0] /= T;
-        ++c_it;
+    for (int i = 0; i < size; i++) {
+        centroid[i] = int(sum[i]/T);
     }
 
     return centroid;
