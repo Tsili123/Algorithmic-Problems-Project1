@@ -154,10 +154,10 @@ bool Cluster::Compare(vector<vector<int>> previous_clusters) {
             }
         }
 
-        // If 30% of the cluster has changed return true
+        // If 10% of the cluster has changed return true
         double percentage = sum_of_diff_points/(double) size;
         cout << percentage << endl;
-        if (percentage >= 0.2) return true;
+        if (percentage >= 0.1) return true;
     }
 
     return false;
@@ -178,6 +178,8 @@ void Cluster::Lloyd_method() {
     // Do this until there is almost no difference to the centroids
     while (Compare(previous_clusters)) {
         // Assign each point to its centroid
+        for (int centroid = 0; centroid < number_of_clusters; centroid++)
+            Lloyd[centroid].second.clear();
         for (int point = 0; point < num_of_Items; point++) {
             long double dis = (long double) NUM;
             int point_centroid = -1;
@@ -211,6 +213,64 @@ void Cluster::Lloyd_method() {
     duration<double, std::milli> time = end - begin;
     
     cout << "Lloyd TIME: " << time.count() << endl;
+}
+
+void Cluster::Silhouette() {
+    vector<long double> s(num_of_Items);
+    auto begin = high_resolution_clock::now();
+
+    vector<long double> sil(number_of_clusters);
+
+    for (int cluster = 0; cluster < number_of_clusters; cluster++) {
+        int size_of_cluster = Lloyd[cluster].second.size();
+        for (auto i: Lloyd[cluster].second) {
+            // Calculate average distance
+            long double a = 0.0;
+            for (auto j: Lloyd[cluster].second) {
+                if (i != j) {
+                    a += euclidean_dis(this->data[i], this->data[j]);
+                }
+            }
+
+            a /= (size_of_cluster-1); // average distance of i to objects in same cluster
+
+            // Find Second closest centroid
+            long double dist = NUM;
+            int sec_cluster = -1;
+            for (int second_cluster = 0; second_cluster < number_of_clusters; second_cluster++) {
+                if (cluster != second_cluster) {
+                    long double point_dist = euclidean_dis(this->data[i], Lloyd[second_cluster].first);
+                    if (dist > point_dist) {
+                        sec_cluster = second_cluster;
+                        dist = point_dist;
+                    }
+                }
+            }
+
+            // Calculate average distance of second cluster
+            long double b = 0.0;
+            for (auto j: Lloyd[sec_cluster].second) {
+                if (i != j) {
+                    b += euclidean_dis(this->data[i], this->data[j]);
+                }
+            }
+
+            b /= (Lloyd[sec_cluster].second.size()-1);
+
+            // Calculate Silhouette
+            s[i] = (b - a) / (b > a ? b : a);
+            sil[cluster] += s[i];
+            // cout << s[i] << ", " << a << ", " << b << endl;
+        }
+
+        sil[cluster] /= size_of_cluster;
+        cout << cluster << ": " << sil[cluster] << endl;
+    }
+
+    auto end = high_resolution_clock::now();
+    duration<double, std::milli> time = end - begin;
+    
+    cout << "Silhouette TIME: " << time.count() << endl;
 }
 
 void Cluster::print() {
