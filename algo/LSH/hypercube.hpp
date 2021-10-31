@@ -9,7 +9,6 @@
 #include <string>
 
 typedef std::vector<std::list<int>> hypercube_hashtable;
-Euclidean_H_i *H_i_ptr;
 
 template <typename T>
 
@@ -18,12 +17,11 @@ class Euclidean_H_i {
         vector<vector <double>> v; /* Vectors with random normal numbers, used for hashfunction */
         vector<double> t; // Vector with random numbers between 0 and w picked uniformly  
 		int w ;
-		long int *h_i;
 		int k;
     public:
-        Euclidean_H_i_init(int k, int dimlim) {
+        Euclidean_H_i_init(int k_, int dimlim) {
 
-			h_i = new long int[k];
+			k=k_;
 			// Initialize the vectors used for hashing
 			v.resize(k, vector<double>(dimlim));
 
@@ -59,14 +57,14 @@ class Euclidean_H_i {
     		t.clear();
 		} 
 
-		Specific_H_i(vector<int> item) {
+		Specific_Hi(vector<int> item) {
 			long int sum;
 			for (int var = 1; var < k; var++) {
 				for (int var2 = 1; var2 < dimlim; var2++) {
-            		sum += item[var2] * v[var2];
+            		sum += item[var2] * v[var][var2];
         		}
 				sum += t[var];
-        		sum = floor(sum /w);
+        		sum = floor(sum /(double) w);
 				h[var] = sum;
 				sum=0;
 			}
@@ -91,14 +89,15 @@ class Hypercube{
 
     // Hypercube is a hashtable
 	hypercube_hashtable hypercube;
-    //hash functions for every point in the hypercube
-	LSH::Euclidean_Hash_Function hash_funcs;
+	Euclidean_H_i *Hi_ptr;
 	// vector of the vectors is given 
-	std::vector<std::vector<int>> data_vectors;   
-	// mapping the fliped-coins decision for every possible outcoume of the hash function
-	std::vector<std::unordered_map<int, bool>> flipped_coins;
+	std::vector<std::vector<int>> data_vectors; 
+	std::vector<Euclidean_H_i*> H; // H contains sub hash functions     
+	std::vector<std::uniform_int_distribution<int> > dists; // Distributions for fi 
+	std::default_random_engine generator; 
+    std::vector<std::unordered_map<int, bool>  > Hi_map; //  map f with unique values
 
-    public:
+	public:
     
         //Constructor class
 		Hypercube(long long int m_,int k_,int threshold_, 
@@ -121,7 +120,7 @@ class Hypercube{
             buckets_num = (int)pow(2, k);
 
             //Create hash functions for each bucket
-            Euclidean_H_i::Euclidean_Hi(k,space);
+            H_i_ptr = new Euclidean_H_i_Init(k,space);
 
             // initialize the hypercube hashtable
             //every bucket contains a list of integers
@@ -132,21 +131,11 @@ class Hypercube{
                 hypercube.push_back(temp_list);
             }
 			
-			// create the list of the f_i functions
-			for (int i = 0; i < k; i++) {
-				std::unordered_map<int,bool> current_map;
-				// compute all the possible hash function outcomes to 0-1, so we save time 
-				for (int j = 0; j < buckets_num; j++) {
-					bool res = dist(gen);
-					current_map.insert({i, res});
-				}
-				flipped_coins.push_back(current_map);
-			}
 
 			// insert all of the points into the hypercube
 			for (int i = 0; i < points_num; i++) {
 				int bucket_id = hypercube_hash(data_vectors.at(i));
-				hypercube[bucket_id].push_back(i);
+				this->hypercube[bucket_id].push_back(i);
 			}
 
 			// hypercube initialization done. print the time differenct
@@ -159,23 +148,32 @@ class Hypercube{
 
 		int hypercube_hash(std::vector<int> vec_point){
 			// store the string produced
-			std::string bucket_str;
+			std::string bucket_string = "";
+			int curr_Hi;
+			bool curr_Fi;
+			unordered_map<int, bool>::const_iterator iterh; // Iterate through map
+
 			// hash k times
 			for(int i=0;i<this->k;i++){
                     // hash with the i-th hash fn
-					H_i_ptr->Specific_H_i(vec_point);
-                    long int res = H_i_ptr->get_h_i(k);
-					res = res % bucket_num;
-					// find its pre-maped result of a coin flip
-					bool bit = flipped_coins[i][res];
-					// append the 0/1 value to the string
-					bucket_string += std::to_string(bit);
-			    }
-            }
-			
+					curr_Hi = this->Hi_ptr->Specific_Hi(vec_point);
+
+					// Find if H[i] value exists 
+        			iterh = this->Hi_map[i].find(curr_Hi);
+
+					// Exists 
+        			if(iterh != this->Hi_map[i].end())
+            			curr_Fi = iterh->second;
+					// Map current H[i] and add it in the map 
+        			else{
+            			curr_Fi = this->dists[i](this->generator);
+            			this->Hi_map[i].insert(pair<int, bool>(curr_Hi, curr_Fi));
+        			}
+					bucket_string += std::to_string(curr_Fi);
+		    }
 
 			// convert the bitstring into an integer
-			return (int)std::bitset<32>(bucket_string).to_ulong();
+			return stoi(bucket_string, nullptr, 2);
 		}
 
 		
