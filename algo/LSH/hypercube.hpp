@@ -14,6 +14,25 @@ template <typename T>
 
 class Euclidean_H_i {
     private:
+
+		// For every vertice find all neighbors and scan up to probes vertices(sorted by hamming Distance)  with min heap
+        typedef struct Neighbor_Vertice{
+            int hamming_distance; // Hamming distance with current id
+            int id; // id in  hypercube_hashtable 
+        
+            Neighbor_Vertice(int dist, int id){
+                this->hamming_distance = dist;
+                this->id = id;
+            }
+        }Neighbor_vertice;
+
+        //  Compare class based for hamming distance
+        struct Compare_Vertices{
+            bool operator()(const neighbor_Vertice& x, const neighbor_Vertice& y) const{
+                return x.hamming_distance > y.hamming_distance;
+            }
+        };
+
         vector<vector <double>> v; /* Vectors with random normal numbers, used for hashfunction */
         vector<double> t; // Vector with random numbers between 0 and w picked uniformly  
 		int w ;
@@ -92,8 +111,8 @@ class Hypercube{
 	Euclidean_H_i *Hi_ptr;
 	// vector of the vectors is given 
 	std::vector<std::vector<int>> data_vectors; 
-	std::vector<Euclidean_H_i*> H; // H contains sub hash functions     
-	std::vector<std::uniform_int_distribution<int> > dists; // Distributions for fi 
+	
+	std::vector<std::uniform_int_distribution<int> > f_i; // Distributions for fi 
 	std::default_random_engine generator; 
     std::vector<std::unordered_map<int, bool>  > Hi_map; //  map f with unique values
 
@@ -166,7 +185,7 @@ class Hypercube{
             			curr_Fi = iterh->second;
 					// Map current H[i] and add it in the map 
         			else{
-            			curr_Fi = this->dists[i](this->generator);
+            			curr_Fi = this->f_i[i](this->generator);
             			this->Hi_map[i].insert(pair<int, bool>(curr_Hi, curr_Fi));
         			}
 					bucket_string += std::to_string(curr_Fi);
@@ -176,7 +195,110 @@ class Hypercube{
 			return stoi(bucket_string, nullptr, 2);
 		}
 
+		// Calculate Euclidean Distance
+		long double euclidean_dis(vector<int> vec1, vector<int> vec2) {
+			long double dist=0.0;
+
+			auto itA = vec1.begin();
+			auto itB = vec2.begin();
+			++itA;
+			++itB;
+
+			while(itA != vec1.end() || itB != vec2.end())
+			{
+				dist = dist + (itA[0]-itB[0])*(itA[0]-itB[0]);
+				if(itA != vec1.end()) {
+					++itA;
+				}
+				if(itB != vec2.end()) {
+					++itB;
+				}
+			}
+
+			return sqrt(dist);
+	}
+
+	// Function to calculate hamming distance
+	int hammingDistance(int n1, int n2)
+	{
+		int x = n1 ^ n2;
+		int setBits = 0;
+	
+		while (x > 0) {
+			setBits += x & 1;
+			x >>= 1;
+		}
+	
+		return setBits;
+	}
+ 
+
+	void RNeighbors(vector<int> query, int radius, list<vector<int>>& neighbors, list<double>* neighbors_dists){ 
+		int i, cube_id, pos;
+		double currDist; // Distance of a point in list
+		vector<Neighbor_Vertice> Neighbor_Vertices; // Keep all neighbors  
+		int neighbors_num = 0; 
 		
+		// Clear given lists 
+		neighbors.clear();
+		if(neighbors_dists != NULL)
+			neighbors_dists->clear();
+
+		// Find initial vertice 
+		cube_id = hypercube_hash(query);
+
+		// Find all neighbors of that vertice 
+		for(i = 0; i < this->buckets_num; i++){
+
+			// Don't check the same position 
+			if(i == cube_id)
+				continue;
+
+			Neighbor_Vertices.push_back(Neighbor_Vertice(hammingDistance(cube_id, i), i));
+		}
+
+		// Sort Neighbor Vertices 
+		make_heap(Neighbor_Vertices.begin(), Neighbor_Vertices.end(), Compare_Vertices());
+
+		// Check probes vertices for neighbors 
+		for(i = 0; i < this->max_probes; i++){
+	
+			// Check initial pos 
+			if(i == 0)
+				pos = cube_id
+			// Extract minimum position
+			else
+				pos = Neighbor_Vertices.front().id;
+
+			// Empty vertice 
+			if(this-> hypercube_hashtable[pos].size() == 0)
+				continue;
+
+			// Scan current vertice 
+			for(auto iter = this-> hypercube_hashtable[pos].begin(); iter != this-> hypercube_hashtable[pos].end(); iter++){  
+
+				neighbors_num += 1;
+				
+				// Find current distance 
+				curr_Dist = euclidean_dis(data_vectors.at(*iter),query);
+				
+				// Keep neighbor 
+				if(curr_Dist < radius){
+					neighbors.push_back(*iter);
+					if(neighbors_dists != NULL)
+						neighbors_distances->push_back(curr_Dist);
+				}
+
+				// Found m neighbors 
+				if(neighbors_num == this->threshold)
+					break;
+			} 
+			// end for - Found m neighbors 
+			if(neighbors_num == this->threshold)
+				break;
+		} // end for - Probes
+	}
+
 		
 		
 		
