@@ -16,8 +16,11 @@
 #define M 4294967291
 
 #include "../Handling_input/Handling_input.hpp"
+#include "../functions/functions.hpp"
 
 using namespace std;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration;
 
 class Bucket
 {
@@ -35,7 +38,7 @@ class Euclidean_Hash_Function {
     public:
         Euclidean_Hash_Function() {};
         Euclidean_Hash_Function(int k, int dim); /* Here we initialize all vectors */
-        ~Euclidean_Hash_Function(); 
+        ~Euclidean_Hash_Function();
         vector<vector <double>> get_vector_v() { return v; }
         vector<double> get_vector_t() { return t; }
 };
@@ -53,21 +56,19 @@ class LSH {
         int w;
         vector<int> r;
 
-        int queries_num,R,N,m;
+        int R,N;
         long int hashtable_size;
         Euclidean_Hash_Function *Hash_Funs;
         Bucket*** hashtables;
-        // double *tLSH,dist_AF,time_error;
-        // int **s_i;
-        fstream file;
     public:
         string input_file, query_file, output_file;
         vector<vector<int>> data; // Input Data
         vector<vector<int>> queries_data; // Input Data
+        duration<double, std::milli> ANN_time;
+        duration<double, std::milli> NNB_time;
 
-        LSH(string, string, string, int L_, int N_, int k_, int R_, long long int n, int dim);
+        LSH(string, string, string, int L_, int N_, int k_, int R_, long long int n, int dim, vector<vector<int>>);
         ~LSH();
-        int get_queriesnum() { return queries_num; }
         int get_pointsnum() { return points_num; }
         long int get_hashtablesize() { return hashtable_size; }
         int get_w() { return w; }
@@ -80,6 +81,7 @@ class LSH {
         Euclidean_Hash_Function* get_hash_functions() { return Hash_Funs; }
         void set_w(int value) { w = value; }
 
+        int Calculate_w();
         vector<long long int> Specific_Hash_Value(int g, vector<int> item);
 
         void print_buckets();
@@ -87,20 +89,16 @@ class LSH {
 
 void LSH_Insert_Points_To_Buckets(LSH* info);
 
-double Normal_distribution(); /* Generates a sequence of random normal numbers */
-
 long long int mod(long long int, long int);
 
 void Print_values(); /* Used for Debugging */
 
-long double euclidean_dis(vector<int> , vector<int> );
-
-int Nearest_N_brute(vector<int> );
+vector <double> Nearest_N_brute(vector<int> );
 
 vector<int> Brute_by_range(vector<int> );
 
-vector<pair<int, int>> Nearest_N_search(vector<int> );
+vector<pair<long double, int>> Nearest_N_search(vector<int> );
 
-vector<pair<int, int>> Search_by_range(vector<int> );
+vector<int> Search_by_range(vector<int> );
 
 #endif
