@@ -182,7 +182,7 @@ vector<pair<long double, int>> Nearest_N_search(vector<int> query) {
                     b = index + 1;
                     if (none_of(near_items.begin(), near_items.end(), [b](pair<int, int> item) { return b == item.second; })) {
                         near_items.pop_back();
-                        near_items.insert(near_items.begin(), make_pair(d, b+1));
+                        near_items.insert(near_items.begin(), make_pair(d, b));
                     }
                 } else {
                     d = euc_dist;
@@ -215,7 +215,7 @@ vector<int> Search_by_range(vector<int> query) {
             iterations++;
             int index = Points.first.first;
             long double euc_dist = euclidean_dis(Lsh->data[index], query);
-            index++; // In input file the index starts from 1
+            index += 1; // In input file the index starts from 1
 
             if (euc_dist <= R) {
                 if (none_of(near_items.begin(), near_items.end(), [index](int item) { return index == item; })) {
