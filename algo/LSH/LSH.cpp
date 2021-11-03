@@ -177,18 +177,15 @@ vector<pair<long double, int>> Nearest_N_search(vector<int> query) {
             long double euc_dist = euclidean_dis(Lsh->data[index], query);
 
             if (euc_dist < d) {
-                if (near_items.size() >= N) {
-                    d = euc_dist;
-                    b = index + 1;
-                    if (none_of(near_items.begin(), near_items.end(), [b](pair<int, int> item) { return b == item.second; })) {
+                b = index + 1;
+                if (none_of(near_items.begin(), near_items.end(), [b](pair<long double, int> item) { return b == item.second; })) {
+                    if (near_items.size() >= N) {
                         near_items.pop_back();
-                        near_items.insert(near_items.begin(), make_pair(d, b));
                     }
-                } else {
-                    d = euc_dist;
-                    b = index + 1;
-                    near_items.push_back(make_pair(d, b));
+
+                    near_items.push_back(make_pair(euc_dist, b));
                     sort(near_items.begin(), near_items.end());
+                    d = near_items.back().first;
                 }
             }
         }
@@ -236,19 +233,15 @@ vector <double> Nearest_N_brute(vector<int> query) {
     vector <double> near_items;
 
     for (auto Item: Lsh->data) {
-        if (Item == query) continue;
         long double euc_dist = euclidean_dis(Item, query);
 
         if (euc_dist < d) {
             if (near_items.size() >= N) {
-                d = euc_dist;
                 near_items.pop_back();
-                near_items.insert(near_items.begin(), d);
-            } else {
-                d = euc_dist;
-                near_items.push_back(d);
-                sort(near_items.begin(), near_items.end());
             }
+            near_items.push_back(euc_dist);
+            sort(near_items.begin(), near_items.end());
+            d = near_items.back();
         }
     }
 
