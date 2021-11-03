@@ -116,19 +116,19 @@ void store_LSH_data(int argc,char** argv){
     int i=1;
     
     if(argc == 7){//no param arguments
-        if(string_operation(argv,"-i", input_file,i) == false){
+        if(string_operation(argv, (char*)"-i", input_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return;
         }
 
         i=i+2;
-        if(string_operation(argv,"-q", query_file,i) == false){
+        if(string_operation(argv, (char*)"-q", query_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return;
         }
 
         i=i+2;
-        if(string_operation(argv,"-o", output_file,i) == false){
+        if(string_operation(argv, (char*)"-o", output_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return;
         }
@@ -138,44 +138,44 @@ void store_LSH_data(int argc,char** argv){
         R=10000;
     }else if(argc == 15){ //param arguments
         
-        if(string_operation(argv,"-i", input_file,i) == false){
+        if(string_operation(argv, (char*)"-i", input_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return;
         }
 
         i=i+2;
 
-        if(string_operation(argv,"-q", query_file,i) == false){
+        if(string_operation(argv, (char*)"-q", query_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return;
         }
 
         i=i+2;
-        if(number_operation(argv,"-k",  &k, i) == false){
+        if(number_operation(argv, (char*)"-k",  &k, i) == false){
             cout << "Program exiting due to error ..." << endl;
             return;
         }
         
         i=i+2;
-        if(number_operation(argv,"-L", &L,i) == false){
+        if(number_operation(argv, (char*)"-L", &L,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return;
         }
 
         i=i+2;
-        if(string_operation(argv,"-o",output_file,i) == false){
+        if(string_operation(argv, (char*)"-o",output_file,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return;
         }
 
         i=i+2;
-        if(number_operation(argv,"-N", &N,i) == false){
+        if(number_operation(argv, (char*)"-N", &N,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return;
         }
         
         i=i+2;
-        if(number_operation(argv,"-R", &R,i) == false){
+        if(number_operation(argv, (char*)"-R", &R,i) == false){
             cout << "Program exiting due to error ..." << endl;
             return;
         }
