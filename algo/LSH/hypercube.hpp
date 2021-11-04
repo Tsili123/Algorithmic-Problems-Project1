@@ -31,7 +31,7 @@ class Euclidean_H_i {
 			return round(d(gen));
 		}
 
-        Euclidean_H_i(int k_, int dimlim_){
+        Euclidean_H_i(int k_, int dimlim_, long double W){
 			int dimlim = dimlim_;
 			k=k_;
 			// Initialize the vectors used for hashing
@@ -46,7 +46,7 @@ class Euclidean_H_i {
 			}
 
 			// Initialize w (change it to your liking)
-			w = 500;
+			w = W;
 
 			srand(time(0));
 
@@ -142,8 +142,17 @@ class Hypercube{
             // we have a bitstring of k bits, thus the size of the hypercube table will be 2^k
             buckets_num = (int)pow(2, k);
 
+			long double sum = 0;
+			long int subpoints = this->points_num * 5/100;
+			for (int point = 1; point < subpoints - 1; point++) {
+				for (int second_point = point; second_point < subpoints; second_point++) {
+					sum += euclidean_dis(data_vectors[point], data_vectors[second_point]);
+				}
+				sum /= (subpoints - point);
+			}
+
             //Create hash functions for each bucket
-            this->H_i_ptr = new Euclidean_H_i(k,space);
+            this->H_i_ptr = new Euclidean_H_i(k,space, sum);
 
 			// Set size of H
         	this->Hi_map.reserve(k_);
