@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 
      for(auto i:near_items)
          std::cout << i.second << " " << i.first  << "\n";
+
     // for (auto v: Nearest_N_search(Lsh->queries_data[10])) {
     //     cout << v.first << ", " << v.second << endl;
     // }

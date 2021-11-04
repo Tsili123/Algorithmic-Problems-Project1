@@ -175,7 +175,7 @@ class Hypercube{
 			//insert all of the points into the hypercube
 			for (int i = 0; i < points_num; i++) {
 				int bucket_id = hypercube_hash(data_vectors.at(i));
-				this->hypercube[bucket_id].push_back(i+1);
+				this->hypercube[bucket_id].push_back(i);
 			}
 
 			// hypercube initialization done. print the time differenct
@@ -394,7 +394,7 @@ void nNeighbor(vector<int> query, int N, vector<pair<long double, int>>& near_it
 						near_items.pop_back();
 					}
 
-					near_items.push_back(make_pair(curr_Dist, *iter));
+					near_items.push_back(make_pair(curr_Dist, *iter+1));
 					sort(near_items.begin(), near_items.end(),[](pair<long double, int> const& a, pair<long double, int> const& b)
 					{
 						return a.first < b.first;
