@@ -6,8 +6,8 @@ using std::chrono::duration;
 
 extern Cluster *cluster;
 
-Cluster::Cluster(string input, string config, string out)
-                :input_file(input), config_file(config), output_file(out) {
+Cluster::Cluster(string input, string config, string out, bool comp, string method)
+                :input_file(input), config_file(config), output_file(out), complete(comp), Method(method) {
                     
                     read_config(config);
                     this->num_of_Items = num_of_points();
@@ -197,13 +197,11 @@ void Cluster::Lloyd_method() {
     }
 
     auto end = high_resolution_clock::now();
-    duration<double, std::milli> time = end - begin;
-    
-    cout << "Lloyd TIME: " << time.count() << endl;
+    Cluster_time = end - begin;
 }
 
 void Cluster::Silhouette() {
-    vector<long double> s(number_of_clusters, 0);
+    vector<long double> sil(number_of_clusters, 0);
     auto begin = high_resolution_clock::now();
 
     for (int cluster = 0; cluster < number_of_clusters; cluster++) {
@@ -243,13 +241,15 @@ void Cluster::Silhouette() {
             b /= (Lloyd[sec_cluster].second.size()-1);
 
             // Calculate Silhouette
-            s[cluster] += (b - a) / (b > a ? b : a);
-            // cout << s[i] << ", " << a << ", " << b << endl;
+            sil[cluster] += (b - a) / (b > a ? b : a);
+            // cout << sil[i] << ", " << a << ", " << b << endl;
         }
 
-        s[cluster] /= size_of_cluster;
-        cout << cluster << ": " << s[cluster] << endl;
+        sil[cluster] /= size_of_cluster;
+        // cout << cluster << ": " << sil[cluster] << endl;
     }
+
+    this->s = sil;
 
     auto end = high_resolution_clock::now();
     duration<double, std::milli> time = end - begin;
@@ -264,25 +264,50 @@ void Cluster::print() {
     cout << "max_number_M_hypercube: " << max_number_M_hypercube << endl;
     cout << "number_of_hypercube_dimensions: " << number_of_hypercube_dimensions << endl;
     cout << "number_of_probes: " << number_of_probes << endl;
+}
 
-    for (auto centroid: this->Lloyd) {
-        cout << "CENTROID: ";
-        for (auto point: centroid.first)
-            cout << point << ", ";
-        cout << endl;
-    }
+void Cluster::output() {
+    ofstream Output;
+    Output.open (this->output_file, ofstream::out | ofstream::trunc);
+    Output << "Algorithm: ";
+    if (this->Method == "Classic" || this->Method == "Lloyd") Output << "Lloyds";
+    else if (this->Method == "LSH") Output << "Range Search LSH";
+    else if (this->Method == "Hypercube") Output << "Range Search Hypercube";
+    Output << endl;
 
-    cout << "CENTROID 20 FIRST POINTS: ";
+    int counter = 1;
     for (auto centroid: this->Lloyd) {
-        int counter = 0;
-        cout << "CENTROID: ";
-        for (auto points: centroid.second) {
-            cout << points << ", ";
-            if (counter == 20) break;
-            counter++;
+        bool first = true;
+        Output << "CLUSTER-" << counter << " {size: " << centroid.second.size() << ", centroid: ";
+        for (auto points: centroid.first) {
+            if (first) {
+                first = false;
+                continue;
+            }
+            Output << points << ", ";
         }
-        cout << endl;
+        if (this->complete) {
+            Output << "Items: ";
+            for (auto points: centroid.second) {
+                Output << points << ", ";
+            }
+        }
+        Output << "}" << endl;
+        counter++;
     }
+
+    Output << "cluster_time: " << this->Cluster_time.count() << endl;
+    Output << "Silhouette: [";
+
+    long double stotal = 0.0;
+    for (auto cluster: this->s) {
+        Output << cluster << ",";
+        stotal += cluster;
+    }
+
+    Output << stotal/this->number_of_clusters << "]" << endl;
+
+    Output.close();
 }
 
 // Calculate Euclidean Distance

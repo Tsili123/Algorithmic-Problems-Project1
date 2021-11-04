@@ -7,6 +7,7 @@ int main(int argc, char *argv[]) {
     cluster->kMeanspp_Initialization();
     cluster->Lloyd_method();
     cluster->Silhouette();
+    cluster->output();
     cluster->print();
     return 0;
 }

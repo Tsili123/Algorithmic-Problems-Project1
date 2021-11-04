@@ -100,9 +100,9 @@ bool number_operation(char ** str,char *str2,int *num,int i){
 vector<vector<int>> store_Cluster_data(int argc,char** argv){
     string input_file, configuration_file, output_file;
     string Method;
-    int complete;
+    bool complete = false;
 
-    if(argc!=9 && argc != 11){
+    if(argc!=9 && argc != 10){
         cout << "Error in command line arguments:" << endl;
         cout << "Program exiting due to error ..." << endl;
         return {};
@@ -128,24 +128,29 @@ vector<vector<int>> store_Cluster_data(int argc,char** argv){
         return {};
     }
 
-    if (argc == 11) {
-        i=i+2;
-        if(number_operation(argv, (char*) "-complete", &complete,i) == false){
+    i=i+2;
+    if (argc == 10) {
+         if(strcmp(argv[i],(char*) "-complete")==0){
+            complete = true;
+        }
+        else{//error case
+            cout << "Error in command line arguments:" << endl;
+            cout << "Expected -complete but you typed " << argv[i] << endl;
             cout << "Program exiting due to error ..." << endl;
             return {};
         }
+        i++;
     }
 
-    i=i+2;
     if(string_operation(argv, (char*) "-m", Method,i) == false){
         cout << "Program exiting due to error ..." << endl;
         return {};
-    }        
+    }
         
     vector<vector<int>> vec;
     read_file(vec,input_file);
 
-    cluster = new Cluster(input_file, configuration_file, output_file);
+    cluster = new Cluster(input_file, configuration_file, output_file, complete, Method);
 
     return vec;
 }

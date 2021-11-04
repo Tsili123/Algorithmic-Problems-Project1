@@ -17,8 +17,13 @@
 
 #define NUM 1.79769e+308 // Biggest double num that can be defined
 
+using std::chrono::high_resolution_clock;
+using std::chrono::duration;
+
 class Cluster {
     private:
+        bool complete;
+        string Method;
         int L=3; // num of hash tables for LSH
         int k=4; // k of LSH
         int num_of_Items;
@@ -28,14 +33,17 @@ class Cluster {
         int number_of_probes = 2;
         string input_file, config_file, output_file;
 
+        duration<double> Cluster_time;
         // The centroids kMeans++ initialized
         vector<int> centroids;
+        // Silhouette results
+        vector<long double> s;
         // The first vector is the centroid and the second is a vector of indexes
         vector<pair<vector<int>, vector<int>>> Lloyd;
     public:
         vector<vector<int>> data; // Input data
 
-        Cluster(string, string, string);
+        Cluster(string, string, string, bool, string);
         ~Cluster();
 
         void kMeanspp_Initialization();
@@ -46,6 +54,7 @@ class Cluster {
 
         void read_config(string );
 
+        void output();
         void print();
 };
 
