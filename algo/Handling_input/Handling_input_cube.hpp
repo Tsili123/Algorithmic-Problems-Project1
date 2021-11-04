@@ -2,6 +2,7 @@
 #define HANDLING_INPUT_CUBE_HPP
 
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <vector>
 #include <algorithm>
