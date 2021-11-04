@@ -112,8 +112,6 @@ class Hypercube{
     int w; // a number signifficantly larger thar the radius, affects range search
     int space; // the dimension of the space we are going to have
 	int max_probes; // max probes of the hypercube to be checked during search
-	int N;
-
 
     // Hypercube is a hashtable
 	hypercube_hashtable hypercube;
@@ -125,6 +123,7 @@ class Hypercube{
     std::vector<std::unordered_map<int, bool>  > Hi_map; //  map f with unique values
 	// generator and the random distribution for the mapping
 	public:
+		int N;
 		int R;
 		std::string input_file;
 		std::string query_file;
@@ -164,11 +163,10 @@ class Hypercube{
                 hypercube.push_back(temp_list);
             }
 			
-			bool var = false;
 			//insert all of the points into the hypercube
 			for (int i = 0; i < points_num; i++) {
-				int bucket_id = hypercube_hash(data_vectors.at(i),var);
-				this->hypercube[bucket_id].push_back(i);
+				int bucket_id = hypercube_hash(data_vectors.at(i));
+				this->hypercube[bucket_id].push_back(i+1);
 			}
 
 			// hypercube initialization done. print the time differenct
@@ -179,7 +177,7 @@ class Hypercube{
 
 		~Hypercube(){};
 
-		int hypercube_hash(std::vector<int> vec_point, bool& query){
+		int hypercube_hash(std::vector<int> vec_point){
 			// store the string produced
 			std::string bucket_string = "";
 			int curr_Hi;
@@ -200,8 +198,7 @@ class Hypercube{
 					// Map current H[i] and add it in the map 
         			else{
             			curr_Fi = this->f_i[i](generator);
-						if(query == false)
-            				this->Hi_map[i].insert(std::pair<int, bool>(curr_Hi, curr_Fi));
+            			this->Hi_map[i].insert(std::pair<int, bool>(curr_Hi, curr_Fi));
         			}
 					 bucket_string += std::to_string(curr_Fi);
 		    }
@@ -247,28 +244,6 @@ class Hypercube{
 		return setBits;
 	}
  
-
-	// // Print statistics of sub hash function 
-	// void hashFunctionEuclideanHypercube::print(void){
-
-	// 	if(this->k == -1)
-	// 		cout << "Invalid euclidean hypercube hash function\n";
-	// 	else{
-	// 		int i;
-			
-	// 		cout << "Euclidean hypercube hash function id: " << this->id << "\n";
-	// 		cout << "Value of k: " << this->k << "\n";
-			
-	// 		cout << "Statistics of sub hash functions: \n\n";
-			
-	// 		for(i = 0; i < this->bucket_num; i++){
-	// 			for(j=0;j<this->hypercube[i].size()){
-
-	// 			}
-	// 		}
-	// 			this->H[i]->print();
-	// 	}
-	// }
 	void RNeighbors(std::vector<int> query, int radius, std::list<int>& neighbors, std::list<double>& neighbors_dists){ 
 		int i, cube_id, pos;
 		double curr_Dist; // Distance of a point in list
@@ -281,8 +256,7 @@ class Hypercube{
 		//	neighbors_dists->clear();
 
 		// Find initial vertice 
-		bool var = true;
-		cube_id = hypercube_hash(query,var);
+		cube_id = hypercube_hash(query);
 
 		// Find all neighbors of that vertice 
 		for(i = 0; i < this->buckets_num; i++){
@@ -343,90 +317,94 @@ class Hypercube{
 		} // end for - Probes
 	}
 
-// 	/* Find the nearest neighbor of a given point */
-// void hypercubeEuclidean::nNeighbor(vector<int> query, int radius, list<int>& neighbors, list<double>* neighbors_dists){
-//     int i, initialPos, pos, found = 0, flag = 0;
-//     double currDist; // Distance of a point in list
-//     double d = -1;
-//     list<Item>::iterator iter;
-//     list<Item>::iterator iterNearestNeighbor;
-//     vector<Neighbor_Vertice> neighborVertices; // Keep all neighbors  
-//     int neighbors_num = 0; // Number of neighbors
+// 	/* Find theN nearest neighbors of a given point */
+void nNeighbor(vector<int> query, int N, vector<pair<long double, int>>& near_items){
+    int i ,cube_id,pos;
+    double curr_Dist; // Distance of a point in list
+    vector<Neighbor_Vertice> Neighbor_Vertices; // Keep all neighbors  
+    int neighbors_num = 0; // Number of neighbors
 
-// 	// Find initial vertice 
-// 	cube_id = hypercube_hash(query);
+	// Find initial vertice 
+	cube_id = hypercube_hash(query);
 
-//     // Find all neighbors of that vertice 
-// 	for(i = 0; i < this->buckets_num; i++){
+    // Find all neighbors of that vertice 
+	for(i = 0; i < this->buckets_num; i++){
 
-// 		// Don't check the same position 
-// 		if(i == cube_id)
-// 			continue;
-// 			Neighbor_Vertices.push_back(Neighbor_Vertice(hammingDistance(cube_id, i), i));
-// 	}
+		// Don't check the same position 
+		if(i == cube_id)
+			continue;
+			
+			Neighbor_Vertices.push_back(Neighbor_Vertice(hammingDistance(cube_id, i), i));
+	}
 
-//     // Sort Neighbor Vertices 
-// 	make_heap(Neighbor_Vertices.begin(), Neighbor_Vertices.end(), Compare_Vertices());
+    // Sort Neighbor Vertices 
+	make_heap(Neighbor_Vertices.begin(), Neighbor_Vertices.end(), Compare_Vertices());
+	sort_heap(Neighbor_Vertices.begin(), Neighbor_Vertices.end(), Compare_Vertices());
 
-//     // Check probes vertices for neighbors 
-// 		for(i = 0; i < this->max_probes; i++){
+	// for(i = 0; i < this->buckets_num; i++){
+	// 	 	std::cout << Neighbor_Vertices[i].id << " ";
+	// }
+
+	long double min = 4294967291;
+    // Check probes vertices for neighbors 
+	for(i = 0; i < this->max_probes; i++){
 	
-// 			// Check initial pos 
-// 			if(i == 0)
-// 				pos = cube_id
-// 			// Extract minimum position
-// 			else
-// 				pos = Neighbor_Vertices.front().id;
+		// Check initial pos 
+		if(i == 0)
+			pos = cube_id;
+		// Extract minimum position
+		else
+			pos = Neighbor_Vertices[i-1].id;
+		
+		// Empty vertice 
+		if(this->hypercube[pos].size() == 0)
+			continue;
 
-// 			// Empty vertice 
-// 			if(this-> hypercube_hashtable[pos].size() == 0)
-// 				continue;
-
-//         // Scan current vertice 
-// 		for(auto iter = this-> hypercube_hashtable[pos].begin(); iter != this-> hypercube_hashtable[pos].end(); iter++){  
-// 				neighbors_num += 1;
+		bool var = false;
+        // Scan current vertice 
+		for(auto iter = this->hypercube[pos].begin(); iter != this->hypercube[pos].end(); iter++){  
 				
-// 				// Find current distance 
-// 				curr_Dist = euclidean_dis(data_vectors.at(*iter),query);
+			neighbors_num += 1;	
+			// Find current distance 
+			curr_Dist = euclidean_dis(data_vectors.at(*iter),query);
 				
-            
-//             if (euc_dist < d) {
-//                 if (near_items.size() >= N) {
-//                     d = euc_dist;
-//                     b = index;
-//                     if (none_of(near_items.begin(), near_items.end(), [b](pair<int, int> item) { return b == item.second; })) {
-//                         near_items.pop_back();
-//                         near_items.insert(near_items.begin(), make_pair(d, b));
-//                     }
-//                 } else {
-//                     d = euc_dist;
-//                     b = index;
-//                     near_items.push_back(make_pair(d, b));
-//                     sort(near_items.begin(), near_items.end());
-//                 }
+			if(curr_Dist < min){
+               	
+				min = curr_Dist;
+				//cout << *iter << "\n";
+				for(auto j = near_items.begin();j!=near_items.end();j++){
+					if(j->second == *iter){
+						var=true;
+						break;
+					}
+				}
+				
+				if(var!=true)
+				{
+					if (near_items.size() >= N) {
+						near_items.pop_back();
+					}
 
-//             // Found m neighbors 
-//             if(neighbors_num == m)
-//                 break;
-//         } // End for - Scan list
+					near_items.push_back(make_pair(curr_Dist, *iter));
+					sort(near_items.begin(), near_items.end(),[](pair<long double, int> const& a, pair<long double, int> const& b)
+					{
+						return a.first < b.first;
+					});
+					min = near_items.back().first;
+				}
+				var=false;
+			}
 
-//         // Found m neighbors 
-//         if(neighbors_num == m)
-//             break;
-//     } // End for - Probes
+            // Found threshhold neighbors 
+            if(neighbors_num ==this->threshold)
+                break;
+        } // End for ~ Scan list
 
-//     // Nearest neighbor found 
-//     if(found == 1){
-//         nNeighbor = *iterNearestNeighbor;
-//         if(neighborDistance != NULL)
-//             *neighborDistance = minDist;
-//     }
-//     else{
-//         nNeighbor.setId("Nearest neighbor not found");
-//         if(neighborDistance != NULL)
-//             *neighborDistance = minDist;
-//     }
-// }
+        // Found threshhold neighbors 
+        if(neighbors_num == this->threshold)
+            break;
+    } // End for ~ Probes
+}	
 
 };
 
