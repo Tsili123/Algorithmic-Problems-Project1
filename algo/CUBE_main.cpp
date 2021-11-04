@@ -20,6 +20,12 @@ int main(int argc, char *argv[]) {
     for(auto i:neighbors_dists)
         std::cout << i << "\n";
 
+    cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+    vector<pair<long double, int>> near_items;
+    Hpb->nNeighbor(Hpb->query_data[0],5, near_items);
+
+     for(auto i:near_items)
+         std::cout << i.second << " " << i.first  << "\n";
     // for (auto v: Nearest_N_search(Lsh->queries_data[10])) {
     //     cout << v.first << ", " << v.second << endl;
     // }
