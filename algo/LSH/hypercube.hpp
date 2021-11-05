@@ -404,7 +404,6 @@ void nNeighbor(vector<int> query, int N, vector<pair<long double, int>>& near_it
 }
 
 	vector<std::vector<int>> get_data() { return this->data_vectors; }
-
 };
 
 		
