@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
     vector<double>                 NNB_result;
 
     for (int query = 0; query < queries; query++) {
+        ANN_result.clear();
         Output << "Query:" << query << endl;
         auto begin = high_resolution_clock::now();
         Hpb->nNeighbor(Hpb->query_data[query], Hpb->N, ANN_result);
