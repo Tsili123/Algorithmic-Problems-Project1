@@ -226,28 +226,6 @@ vector<int> Search_by_range(vector<int> query) {
     return near_items;
 }
 
-vector <double> Nearest_N_brute(vector<int> query) {
-    long double d = (double) M; // Minimum distance
-    int N = Lsh->get_N();
-
-    vector <double> near_items;
-
-    for (auto Item: Lsh->data) {
-        long double euc_dist = euclidean_dis(Item, query);
-
-        if (euc_dist < d) {
-            if (near_items.size() >= N) {
-                near_items.pop_back();
-            }
-            near_items.push_back(euc_dist);
-            sort(near_items.begin(), near_items.end());
-            d = near_items.back();
-        }
-    }
-
-    return near_items;
-}
-
 vector<int> Brute_by_range(vector<int> query) {
     int L = Lsh->get_L();
     int k = Lsh->get_k();

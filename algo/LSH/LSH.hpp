@@ -63,7 +63,7 @@ class LSH {
     public:
         string input_file, query_file, output_file;
         vector<vector<int>> data; // Input Data
-        vector<vector<int>> queries_data; // Input Data
+        vector<vector<int>> queries_data; // Query Data
         duration<double, std::milli> ANN_time;
         duration<double, std::milli> NNB_time;
 
@@ -92,8 +92,6 @@ void LSH_Insert_Points_To_Buckets(LSH* info);
 long long int mod(long long int, long int);
 
 void Print_values(); /* Used for Debugging */
-
-vector <double> Nearest_N_brute(vector<int> );
 
 vector<int> Brute_by_range(vector<int> );
 
