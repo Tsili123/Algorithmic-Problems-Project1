@@ -40,6 +40,34 @@ class Cluster {
         vector<long double> s;
         // The first vector is the centroid and the second is a vector of indexes
         vector<pair<vector<int>, vector<int>>> Lloyd;
+
+        /** assignment method chosen by the user. Options are: --------
+         * 
+         * - lloyds
+        - reverse_LSH
+		- reverse_Hypercube 
+		 */
+
+		string assignment_method;
+		
+		// vectors of the centroids
+		vector<vector<T>> centroids;
+
+		// vector that hols the index of the centroid that the current index's vector is assigned to
+		std::vector<int> assigned_centroid;
+
+		// in case of lsh, we need these extra variables
+		int lsh_l;
+		int lsh_k;
+		LSH* lsh_instant;
+
+		// in case of hypercube, we need these extra variables
+		int hc_M;
+		int hc_k;
+		int hc_probes;
+		Hypercube* hc_instant;
+        //---------
+
     public:
         vector<vector<int>> data; // Input data
 
