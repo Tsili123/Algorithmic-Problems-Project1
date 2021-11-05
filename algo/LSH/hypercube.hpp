@@ -3,12 +3,20 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+#include <cctype>
 #include <ctime>
 #include <utility>
 #include <list>
+#include <chrono>
 #include <string>
 #include <random>
-#include<algorithm> // for heap 
+#include <algorithm> // for heap 
+
+#include "../functions/functions.hpp"
+
+using namespace std;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration;
 
 typedef std::vector<std::list<int>> hypercube_hashtable;
 
@@ -127,10 +135,13 @@ class Hypercube{
 		int R;
 		std::string input_file;
 		std::string query_file;
+		std::string output_file;
 		std::vector<std::vector<int>> query_data;
+		duration<double, std::milli> ANN_time;
+        duration<double, std::milli> NNB_time;
 
-		Hypercube(std::string input_, std::string query_,int R_,int k_,int threshold_, 
-		int points_num_,int N_,int space_,int max_probes_,std::vector<std::vector<int>> data_vectors_) :input_file(input_), query_file(query_),  
+		Hypercube(std::string input_, std::string query_, std::string output_,int R_,int k_,int threshold_, 
+		int points_num_,int N_,int space_,int max_probes_,std::vector<std::vector<int>> data_vectors_) :input_file(input_), query_file(query_), output_file(output_),
 		R(R_),k(k_), threshold(threshold_), points_num(points_num_),N(N_),space(space_),max_probes(max_probes_),data_vectors(data_vectors_) {
 			
             //measure the time that it takes to initialize the hypercube
@@ -215,29 +226,6 @@ class Hypercube{
 			// convert the bitstring into an integer
 			return stoi(bucket_string, nullptr, 2);
 		}
-
-		// Calculate Euclidean Distance
-		long double euclidean_dis(std::vector<int> vec1, std::vector<int> vec2) {
-			long double dist=0.0;
-
-			auto itA = vec1.begin();
-			auto itB = vec2.begin();
-			++itA;
-			++itB;
-
-			while(itA != vec1.end() || itB != vec2.end())
-			{
-				dist = dist + (itA[0]-itB[0])*(itA[0]-itB[0]);
-				if(itA != vec1.end()) {
-					++itA;
-				}
-				if(itB != vec2.end()) {
-					++itB;
-				}
-			}
-
-			return sqrt(dist);
-	}
 
 	// Function to calculate hamming distance
 	int hammingDistance(int n1, int n2)
@@ -413,8 +401,9 @@ void nNeighbor(vector<int> query, int N, vector<pair<long double, int>>& near_it
         if(neighbors_num == this->threshold)
             break;
     } // End for ~ Probes
-}	
+}
 
+	vector<std::vector<int>> get_data() { return this->data_vectors; }
 };
 
 		

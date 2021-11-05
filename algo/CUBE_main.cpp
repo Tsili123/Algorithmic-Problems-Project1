@@ -1,6 +1,6 @@
 #include "./Handling_input/Handling_input_cube.hpp"
 #include "./LSH/hypercube.hpp"
-#include <cctype>
+
 class Hypercube;
 using namespace std;
 Hypercube *Hpb;
@@ -13,38 +13,52 @@ int main(int argc, char *argv[]) {
 
     read_file(Hpb->query_data, Hpb->query_file);
 
-    list<int> neighbors;
-    list<double> neighbors_dists;
-    Hpb->RNeighbors(Hpb->query_data[0],Hpb->R,neighbors, neighbors_dists);
-    neighbors_dists.sort();
-    for(auto i:neighbors_dists)
-        std::cout << i << "\n";
-
-    cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
-    vector<pair<long double, int>> near_items;
-    Hpb->nNeighbor(Hpb->query_data[0],5, near_items);
-
-     for(auto i:near_items)
-         std::cout << i.second << " " << i.first  << "\n";
-
-    // for (auto v: Nearest_N_search(Lsh->queries_data[10])) {
-    //     cout << v.first << ", " << v.second << endl;
-    // }
-    // int point = Nearest_N_brute(Lsh->queries_data[10]);
-    // cout << "BRUTE NEAREST POINT: " << point << endl;
-
-    // cout << "SEARCH BY RANGE" << endl;
-    // for (auto v: Search_by_range(Lsh->queries_data[10])) {
-    //     cout << v.first << ", " << v.second << endl;
-    // }
-
-    // cout << "BRUTE SRB" << endl;
-    // for (auto v: Brute_by_range(Lsh->queries_data[10])) {
-    //     cout << "BRUTE SBR POINT: " << v << endl;
-    // }
+    int queries = Hpb->query_data.size();
     
-    // cout << euclidean_dis(Lsh->data[0], Lsh->data[2]) << endl;
-    // cout << euclidean_dis(Lsh->data[3], Lsh->data[4]) << endl;
+    ofstream Output;
+    Output.open (Hpb->output_file, ofstream::out | ofstream::trunc);
+
+    vector<pair<long double, int>> ANN_result;
+    vector<double>                 NNB_result;
+
+    for (int query = 0; query < queries; query++) {
+        ANN_result.clear();
+        Output << "Query:" << query << endl;
+        auto begin = high_resolution_clock::now();
+        Hpb->nNeighbor(Hpb->query_data[query], Hpb->N, ANN_result);
+        auto end = high_resolution_clock::now();
+        Hpb->ANN_time = end - begin;
+
+        begin = high_resolution_clock::now();
+        NNB_result = Nearest_N_brute(Hpb->get_data(), Hpb->query_data[query], Hpb->N);
+        end = high_resolution_clock::now();
+        Hpb->NNB_time = end - begin;
+
+        list<int> neighbors;
+        list<double> neighbors_dists;
+        Hpb->RNeighbors(Hpb->query_data[query],Hpb->R,neighbors, neighbors_dists);
+        // neighbors_dists.sort();
+
+        for (int neighbor = 0; neighbor < Hpb->N; neighbor++) {
+            Output << "Nearest neighbor-" << neighbor << ": ";
+            neighbor > ANN_result.size() - 1 ?
+                Output << "Not Found" << endl << "distanceHypercube: " << endl:
+                Output << ANN_result[neighbor].second << endl
+                << "distanceHypercube: " << ANN_result[neighbor].first << endl;
+            Output << "distanceTrue: " << NNB_result[neighbor] << endl << endl;
+        }
+
+        Output << "tLSH: " << Hpb->ANN_time.count() << endl;
+        Output << "tTrue: " << Hpb->NNB_time.count() << endl << endl;
+
+        Output << "R-near neighbors:" << endl;
+        for (auto point: neighbors) {
+            Output << point << endl;
+        }
+        Output << endl;
+    }
+    
+    Output.close();
 
     // Print_values();
 }

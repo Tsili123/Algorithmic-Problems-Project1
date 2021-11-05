@@ -104,7 +104,7 @@ void store_data(int argc,char** argv){
     string input_file,query_file,output_file;
     int N, R, k, M,probes;
 
-    if(argc!=7 && argc != 15){
+    if(argc!=7 && argc != 17){
         cout << "Error in command line arguments:" << endl;
         cout << "argc " << argc << endl;
         cout << "Program exiting due to error ..." << endl;
@@ -178,6 +178,6 @@ void store_data(int argc,char** argv){
     vector<vector<int>> vec;
     read_file(vec,input_file);
 
-    Hpb = new Hypercube(input_file,query_file,R,k,1000,num_of_points(),N, dim_data(),probes,vec);
+    Hpb = new Hypercube(input_file,query_file, output_file, R,k,1000,num_of_points(),N, dim_data(),probes,vec);
 		
 }

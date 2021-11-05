@@ -1,4 +1,4 @@
-#include "./LSH/bucket.hpp"
+#include "./LSH/LSH.hpp"
 
 using namespace std;
 
@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
         Lsh->ANN_time = end - begin;
 
         begin = high_resolution_clock::now();
-        NNB_result = Nearest_N_brute(Lsh->queries_data[query]);
+        NNB_result = Nearest_N_brute(Lsh->data, Lsh->queries_data[query], Lsh->get_N());
         end = high_resolution_clock::now();
         Lsh->NNB_time = end - begin;
 

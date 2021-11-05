@@ -1,8 +1,4 @@
 #include <iostream>
-#include <fstream>
-#include <vector>
-#include <random>
-#include <map>
 
 #include "functions.hpp"
 
@@ -40,4 +36,25 @@ long double euclidean_dis(vector<int> vec1, vector<int> vec2) {
     }
 
 	return sqrt(dist);
+}
+
+vector <double> Nearest_N_brute(vector<vector<int>> data, vector<int> query, int N) {
+    long double d = (double) BIG; // Minimum distance
+
+    vector <double> near_items;
+
+    for (auto Item: data) {
+        long double euc_dist = euclidean_dis(Item, query);
+
+        if (euc_dist < d) {
+            if (near_items.size() >= N) {
+                near_items.pop_back();
+            }
+            near_items.push_back(euc_dist);
+            sort(near_items.begin(), near_items.end());
+            d = near_items.back();
+        }
+    }
+
+    return near_items;
 }
