@@ -61,9 +61,11 @@ void Cluster::kMeanspp_Initialization() {
         next_max_D = -1;
         vector<pair<int, long double>> prob;
         for (int point = 0; point < input_items; point++) {
+            // If point is not a centroid
             if (none_of(this->centroids.begin(), this->centroids.end(), [point](int centroid) { return point == centroid; })) {
                 long double dis = (long double) NUM;
                 int potential_centroid = -1;
+                // Find the closest centroid to the point
                 for (auto centroid: this->centroids) {
                     long double point_dist;
                     if (P == 0.0) point_dist = euclidean_dis(this->data[point], this->data[centroid]);
@@ -81,10 +83,12 @@ void Cluster::kMeanspp_Initialization() {
                     }
                 }
 
+                // Keep max distance
                 if (dis > next_max_D) next_max_D = dis;
 
                 sum_min_dists += dis;
 
+                // Store the min distance and the point
                 prob.push_back(make_pair(potential_centroid, dis));
             }
         }
@@ -93,6 +97,8 @@ void Cluster::kMeanspp_Initialization() {
 
         long double highest_prob = -1;
         int next_centroid = -1;
+        // The point with the highest probability with be the next centroid
+        // Probability = distance/sum of distances
         for (auto item: prob) {
             long double prob = item.second/P;
             if (prob > highest_prob) {
