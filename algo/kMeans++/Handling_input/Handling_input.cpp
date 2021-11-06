@@ -72,79 +72,45 @@ void read_file(vector<vector<int>> &vec,string input_file){
     
 }
 
-bool string_operation(char ** str,char *str2,string &str3,int i){
-    if(strcmp(str[i],str2)==0){
-            str3 = string(str[i+1]);
-            return true;
-    }
-    else{//error case
-        cout << "Error in command line arguments:" << endl;
-        cout << "Expected " << string(str2) << " but you typed " << string(str[i]) << endl;
-        return false;
-    }
-}
-
-bool number_operation(char ** str,char *str2,int *num,int i){
-    if(strcmp(str[i],str2)==0){
-            *num = atoi(str[i+1]);
-            return true;
-    }
-    else{
-        //error case
-        cout << "Error in command line arguments:" << endl;
-        cout << "Expected " << string(str2) << " but you typed " << string(str[i]) << endl;
-        return false;
-    }
-}
-
 vector<vector<int>> store_Cluster_data(int argc,char** argv){
-    string input_file, configuration_file, output_file;
+    string input_file = "", configuration_file = "", output_file = "";
+    int N = 1, R = 10000, k = 4, L = 5;
     string Method;
     bool complete = false;
 
-    if(argc!=9 && argc != 10){
+    if(argc < 9 || argc > 10){
         cout << "Error in command line arguments:" << endl;
+        cout << "argc " << argc << endl;
         cout << "Program exiting due to error ..." << endl;
-        return {};
+        exit (EXIT_FAILURE);
     }
 
-    int i=1;
-    
-    if(string_operation(argv, (char*) "-i", input_file,i) == false){
-        cout << "Program exiting due to error ..." << endl;
-        return {};
-    }
-
-    i=i+2;
-
-    if(string_operation(argv, (char*) "-c", configuration_file,i) == false){
-        cout << "Program exiting due to error ..." << endl;
-        return {};
-    }
-
-    i=i+2;
-    if(string_operation(argv, (char*) "-o",output_file,i) == false){
-        cout << "Program exiting due to error ..." << endl;
-        return {};
-    }
-
-    i=i+2;
-    if (argc == 10) {
-         if(strcmp(argv[i],(char*) "-complete")==0){
+    for (int i = 1; i < argc; i++) {
+        if (!strcmp(argv[i], "-i")) {
+            i++;
+            input_file = string(argv[i]);
+        }
+        else if (!strcmp(argv[i], "-c")) {
+            i++;
+            configuration_file = string(argv[i]);
+        }
+        else if (!strcmp(argv[i], "-o")) {
+            i++;
+            output_file = string(argv[i]);
+        }
+        else if(strcmp(argv[i], "-complete")==0){
             complete = true;
         }
-        else{//error case
-            cout << "Error in command line arguments:" << endl;
-            cout << "Expected -complete but you typed " << argv[i] << endl;
-            cout << "Program exiting due to error ..." << endl;
-            return {};
+        else if(strcmp(argv[i], "-m")==0){
+            complete = true;
+            i++;
+            Method = string(argv[i]);
         }
-        i++;
     }
 
-    if(string_operation(argv, (char*) "-m", Method,i) == false){
-        cout << "Program exiting due to error ..." << endl;
-        return {};
+    if (input_file == "" || configuration_file == "" || output_file == "") {
+        cout << "Error: Missing files directory" << endl;
+        exit (EXIT_FAILURE);
     }
         
     vector<vector<int>> vec;
