@@ -421,7 +421,8 @@ void update(void) {
     // insert the vectors in the map
 	for (int i = 0; i < points_num; i++) {
 		int assigned = assigned_centroid.at(i);
-		centroids_map.at(assigned).push_back(data.at(i));
+		//centroids_map.at(assigned).push_back(data.at(i));
+        centroids_map[assigned].second.push_back(data.at(i));
 	}
 	
     // for each centroid 
@@ -432,9 +433,9 @@ void update(void) {
             vector<int> current_component;
 			
             // parse through all of its assigned vectors in order to find the median
-		    for (int n = 0; n < centroids_map.at(i).size(); n++) {
+		    for (int n = 0; n < centroids_map[i].second.size(); n++) {
 				    
-                    current_component.push_back(centroids_map.at(i).at(n).at(j));
+                    current_component.push_back(centroids_map[i].second.at(n).at(j));
 			}
 				
             
