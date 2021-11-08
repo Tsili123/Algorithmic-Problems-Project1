@@ -210,14 +210,30 @@ void Cluster::Silhouette() {
     vector<long double> sil(number_of_clusters, 0);
     auto begin = high_resolution_clock::now();
 
+    unordered_map<string, long double> dists;
+
     for (int cluster = 0; cluster < number_of_clusters; cluster++) {
         int size_of_cluster = Lloyd[cluster].second.size();
-        for (auto i: Lloyd[cluster].second) {
+        vector<int> Points = Lloyd[cluster].second;
+        for (auto i: Points) {
             // Calculate average distance
             long double a = 0.0;
-            for (auto j: Lloyd[cluster].second) {
+            for (auto j: Points) {
                 if (i != j) {
-                    a += euclidean_dis(this->data[i], this->data[j]);
+                    unordered_map<string, long double>::iterator it = dists.find(to_string(i)+to_string(j));
+                    if (it != dists.end()) {
+                        a += it->second;
+                    }
+                    else {
+                        unordered_map<string, long double>::iterator it = dists.find(to_string(j)+to_string(i));
+                        if (it != dists.end()) {
+                            a += it->second;
+                        } else {
+                            long double euc_dis = euclidean_dis(this->data[i], this->data[j]);
+                            a += euc_dis;
+                            dists[to_string(i)+to_string(j)] = euc_dis;
+                        }
+                    }
                 }
             }
 
@@ -240,7 +256,20 @@ void Cluster::Silhouette() {
             long double b = 0.0;
             for (auto j: Lloyd[sec_cluster].second) {
                 if (i != j) {
-                    b += euclidean_dis(this->data[i], this->data[j]);
+                    unordered_map<string, long double>::iterator it = dists.find(to_string(i)+to_string(j));
+                    if (it != dists.end()) {
+                        b += it->second;
+                    }
+                    else {
+                        unordered_map<string, long double>::iterator it = dists.find(to_string(j)+to_string(i));
+                        if (it != dists.end()) {
+                            b += it->second;
+                        } else {
+                            long double euc_dis = euclidean_dis(this->data[i], this->data[j]);
+                            b += euc_dis;
+                            dists[to_string(i)+to_string(j)] = euc_dis;
+                        }
+                    }
                 }
             }
 
@@ -264,128 +293,128 @@ void Cluster::Silhouette() {
 }
 
 //compute the nearest center for a given vector
-int Cluster::nearest_centroid(vector<int> vec) {
-	int min_dist = (int)INT_MAX;
-	int nearest = -1;
-	// compute the distances to all the centroids
-	for (int i = 0; i < k; i++) {
-		int dist = metrics::ManhatanDistance(vec, centroids.at(i), space_dim);
-		// set it as min
-		if (dist < min_dist) {
-			min_dist = dist;
-			nearest = i;
-		}
-	}
-	assert(nearest != -1);
+// int Cluster::nearest_centroid(vector<int> vec) {
+// 	int min_dist = (int)INT_MAX;
+// 	int nearest = -1;
+// 	// compute the distances to all the centroids
+// 	for (int i = 0; i < k; i++) {
+// 		int dist = metrics::ManhatanDistance(vec, centroids.at(i), space_dim);
+// 		// set it as min
+// 		if (dist < min_dist) {
+// 			min_dist = dist;
+// 			nearest = i;
+// 		}
+// 	}
+// 	assert(nearest != -1);
 
-	return nearest;
-};
+// 	return nearest;
+// };
 
-// compute how many unassigned vectors we've got, for the reverse assignement method
-int Cluster::count_unassigned(vector<int> assigned) {
-	int res = 0;
-	for (int i = 0; i < n_points; i++) {
-		if (assigned.at(i) == UNASSIGNED) {
-			res++;
-		}
-	}
-	return res;
-}
+// // compute how many unassigned vectors we've got, for the reverse assignement method
+// int Cluster::count_unassigned(vector<int> assigned) {
+// 	int res = 0;
+// 	for (int i = 0; i < n_points; i++) {
+// 		if (assigned.at(i) == UNASSIGNED) {
+// 			res++;
+// 		}
+// 	}
+// 	return res;
+// }
 
-// compute the minimum of the distances of the centroids. Needed for the initialization of the radius in reverse assignment
-int  Cluster::min_dist_between_centroids() {
-	// initialize the min distance
-	int min_dist = (int)INT_MAX;
-	// brute force all the distances in order to find the smallest
+// // compute the minimum of the distances of the centroids. Needed for the initialization of the radius in reverse assignment
+// int  Cluster::min_dist_between_centroids() {
+// 	// initialize the min distance
+// 	int min_dist = (int)INT_MAX;
+// 	// brute force all the distances in order to find the smallest
 
-	for (int i = 0; i < k; i++) {
-		for (int j = 0; j < k; j++) {
-			if (i != j) {
-				int dist = metrics::ManhatanDistance(centroids.at(i), centroids.at(j), space_dim);
-				if (dist < min_dist)
-					min_dist = dist;
-			}
-		}
-	} 
-	return min_dist;
-}
+// 	for (int i = 0; i < k; i++) {
+// 		for (int j = 0; j < k; j++) {
+// 			if (i != j) {
+// 				int dist = metrics::ManhatanDistance(centroids.at(i), centroids.at(j), space_dim);
+// 				if (dist < min_dist)
+// 					min_dist = dist;
+// 			}
+// 		}
+// 	} 
+// 	return min_dist;
+// }
 
-int reverse_assignment(void) {
-	// keep a vector of the new assignments
-	vector<int> new_assigned(n_points, -1);
+// int reverse_assignment(void) {
+// 	// keep a vector of the new assignments
+// 	vector<int> new_assigned(n_points, -1);
 
-	// initial radius
-	int radius = min_dist_between_centroids() / 2;
+// 	// initial radius
+// 	int radius = min_dist_between_centroids() / 2;
 
-	// keep track of the changes
-	int changes = 0;
+// 	// keep track of the changes
+// 	int changes = 0;
 
-	// set a threshold in order to break the loop
-	int prev_unassigned = INT_MAX;
+// 	// set a threshold in order to break the loop
+// 	int prev_unassigned = INT_MAX;
 
-	// keep track of unassinged points
-	int unassinged = INT_MAX - 1;
+// 	// keep track of unassinged points
+// 	int unassinged = INT_MAX - 1;
 
-	// break the loop when all the balls contain no new vectors
-	while (unassinged != prev_unassigned) {
-	// do a range search query for every centroid
+// 	// break the loop when all the balls contain no new vectors
+// 	while (unassinged != prev_unassigned) {
+// 	// do a range search query for every centroid
 				
-        for (int i = 0; i < k; i++) {
+//         for (int i = 0; i < k; i++) {
 
-			list<pair<int, int>> result;
+// 			list<pair<int, int>> result;
 			
-            // the type of range search depends on what the user wants
-			if (assignment_method == "reverse_LSH")
-				result = lsh_instant->RangeSearch(centroids.at(i), radius, 1);
-			else if (assignment_method == "reverse_Hypercube")
-				result = hc_instant->RNeighbors(centroids.at(i), radius, 1);
+//             // the type of range search depends on what the user wants
+// 			if (assignment_method == "reverse_LSH")
+// 				result = lsh_instant->RangeSearch(centroids.at(i), radius, 1);
+// 			else if (assignment_method == "reverse_Hypercube")
+// 				result = hc_instant->RNeighbors(centroids.at(i), radius, 1);
 
-			// iterate all the results
-			typename std::list<std::pair<int,T>>::iterator pair_it;
+// 			// iterate all the results
+// 			typename std::list<std::pair<int,T>>::iterator pair_it;
 					
-            for (pair_it = result.begin(); pair_it !=result.end(); pair_it++) {
-				// get the current vector
-				int curr_vec = pair_it->first;
+//             for (pair_it = result.begin(); pair_it !=result.end(); pair_it++) {
+// 				// get the current vector
+// 				int curr_vec = pair_it->first;
 
-				// if it is still unassigned
-				if (new_assigned.at(curr_vec) == -1) {
-					// temporarly assign it to this centroid
-					new_assigned.at(curr_vec) = i;
-				}// if it has been already assigned
-				else {
-					// chcek if its distance from the current centroid, is less than the previous' one
-					int prev_assigned = new_assigned.at(curr_vec); 
-					T prev_dist = metrics::ManhatanDistance(feature_vectors.at(curr_vec), centroids.at(prev_assigned), space_dim);
-					T new_dist = pair_it->second;
-					// if it is, it is closest to the current centroid, thus change the asssigned value in the temp vector
-					if (new_dist < prev_dist)
-						new_assigned.at(curr_vec) = i;
-				}
-			}
-		}
+// 				// if it is still unassigned
+// 				if (new_assigned.at(curr_vec) == -1) {
+// 					// temporarly assign it to this centroid
+// 					new_assigned.at(curr_vec) = i;
+// 				}// if it has been already assigned
+// 				else {
+// 					// chcek if its distance from the current centroid, is less than the previous' one
+// 					int prev_assigned = new_assigned.at(curr_vec); 
+// 					T prev_dist = metrics::ManhatanDistance(feature_vectors.at(curr_vec), centroids.at(prev_assigned), space_dim);
+// 					T new_dist = pair_it->second;
+// 					// if it is, it is closest to the current centroid, thus change the asssigned value in the temp vector
+// 					if (new_dist < prev_dist)
+// 						new_assigned.at(curr_vec) = i;
+// 				}
+// 			}
+// 		}
 
-		// update the unassigned vectors count
-		prev_unassigned = unassinged;
-		unassinged = count_unassigned(new_assigned);
-		// update the radius
-		radius *= 2;
-	}
+// 		// update the unassigned vectors count
+// 		prev_unassigned = unassinged;
+// 		unassinged = count_unassigned(new_assigned);
+// 		// update the radius
+// 		radius *= 2;
+	// }
 
 			
-    // update the untracked vectors, and check for new changes
-	for (int i = 0; i < n_points; i++) {
-	// for each one not tracked, use direct assignment
-	if (new_assigned.at(i) == UNASSIGNED)
-			new_assigned.at(i) = nearest_centroid(feature_vectors.at(i));
-		    // check for changes
-			if (assigned_centroid.at(i) != new_assigned.at(i))
-					changes++;
-			}
+//     // update the untracked vectors, and check for new changes
+// 	for (int i = 0; i < n_points; i++) {
+// 	// for each one not tracked, use direct assignment
+// 	if (new_assigned.at(i) == UNASSIGNED)
+// 			new_assigned.at(i) = nearest_centroid(feature_vectors.at(i));
+// 		    // check for changes
+// 			if (assigned_centroid.at(i) != new_assigned.at(i))
+// 					changes++;
+// 			}
 
-			// update the assigned vector
-			assigned_centroid = new_assigned;
-			return changes;
-};
+// 			// update the assigned vector
+// 			assigned_centroid = new_assigned;
+// 			return changes;
+// };
 
 
 void Cluster::print() {
