@@ -210,14 +210,30 @@ void Cluster::Silhouette() {
     vector<long double> sil(number_of_clusters, 0);
     auto begin = high_resolution_clock::now();
 
+    unordered_map<string, long double> dists;
+
     for (int cluster = 0; cluster < number_of_clusters; cluster++) {
         int size_of_cluster = Lloyd[cluster].second.size();
-        for (auto i: Lloyd[cluster].second) {
+        vector<int> Points = Lloyd[cluster].second;
+        for (auto i: Points) {
             // Calculate average distance
             long double a = 0.0;
-            for (auto j: Lloyd[cluster].second) {
+            for (auto j: Points) {
                 if (i != j) {
-                    a += euclidean_dis(this->data[i], this->data[j]);
+                    unordered_map<string, long double>::iterator it = dists.find(to_string(i)+to_string(j));
+                    if (it != dists.end()) {
+                        a += it->second;
+                    }
+                    else {
+                        unordered_map<string, long double>::iterator it = dists.find(to_string(j)+to_string(i));
+                        if (it != dists.end()) {
+                            a += it->second;
+                        } else {
+                            long double euc_dis = euclidean_dis(this->data[i], this->data[j]);
+                            a += euc_dis;
+                            dists[to_string(i)+to_string(j)] = euc_dis;
+                        }
+                    }
                 }
             }
 
@@ -240,7 +256,20 @@ void Cluster::Silhouette() {
             long double b = 0.0;
             for (auto j: Lloyd[sec_cluster].second) {
                 if (i != j) {
-                    b += euclidean_dis(this->data[i], this->data[j]);
+                    unordered_map<string, long double>::iterator it = dists.find(to_string(i)+to_string(j));
+                    if (it != dists.end()) {
+                        b += it->second;
+                    }
+                    else {
+                        unordered_map<string, long double>::iterator it = dists.find(to_string(j)+to_string(i));
+                        if (it != dists.end()) {
+                            b += it->second;
+                        } else {
+                            long double euc_dis = euclidean_dis(this->data[i], this->data[j]);
+                            b += euc_dis;
+                            dists[to_string(i)+to_string(j)] = euc_dis;
+                        }
+                    }
                 }
             }
 
@@ -284,6 +313,7 @@ int Cluster::Manhatan_Distance(std::vector<int>x, std::vector<int>y, int dim){
 }
 
 //compute the nearest center for a given vector
+
 int Cluster::nearest_centroid(vector<int> vec) {
 	int min_distance =  4294967291;
 	int nearest_centroid = -1;
@@ -443,6 +473,7 @@ void update(void) {
 		}
 	}
 };
+
 
 // run the clustering algorithm
 void run_clusters(void) {

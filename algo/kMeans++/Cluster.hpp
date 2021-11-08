@@ -9,6 +9,7 @@
 #include <cmath>
 #include <map>
 #include <stdlib.h>
+#include <bits/stdc++.h>
 #include <time.h>
 #include <algorithm>
 #include <chrono>
@@ -51,7 +52,7 @@ class Cluster {
 		string assignment_method;
 		
 		// vectors of the centroids
-		vector<vector<T>> centroids;
+		// vector<vector<T>> centroids;
 
 		// vector that hols the index of the centroid that the current index's vector is assigned to
 		std::vector<int> assigned_centroid;
@@ -59,13 +60,13 @@ class Cluster {
 		// in case of lsh, we need these extra variables
 		int lsh_l;
 		int lsh_k;
-		LSH* lsh_instant;
+		// LSH* lsh_instant;
 
 		// in case of hypercube, we need these extra variables
 		int hc_M;
 		int hc_k;
 		int hc_probes;
-		Hypercube* hc_instant;
+		// Hypercube* hc_instant;
         //---------
 
     public:
