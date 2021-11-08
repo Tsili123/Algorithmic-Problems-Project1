@@ -299,7 +299,7 @@ class Hypercube{
 
 				// Keep neighbor 
 				if(curr_Dist < radius){
-					neighbors.push_back(*iter);
+					neighbors.push_back(*iter+1);
 					//if(neighbors_dists != NULL)
 						neighbors_dists.push_back(curr_Dist);
 				}
@@ -370,7 +370,7 @@ void nNeighbor(vector<int> query, int N, vector<pair<long double, int>>& near_it
 				min = curr_Dist;
 				//cout << *iter << "\n";
 				for(auto j = near_items.begin();j!=near_items.end();j++){
-					if(j->second == *iter){
+					if(j->second == *iter+1){
 						var=true;
 						break;
 					}
