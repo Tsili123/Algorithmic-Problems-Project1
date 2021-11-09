@@ -226,6 +226,38 @@ vector<int> Search_by_range(vector<int> query) {
     return near_items;
 }
 
+vector<std::pair<long double,int>> Search_by_range2(vector<int> query) {
+    long int iterations = 0; // When it reaches 100L stop
+    int L = Lsh->get_L();
+    int k = Lsh->get_k();
+    int R = Lsh->get_R();
+
+    vector<std::pair<long double,int>> near_items;
+
+    Bucket *** buckets = Lsh->get_hashtables();
+
+    for (int g = 0; g < L; g++) {
+        vector<long long int> hash_value = Lsh->Specific_Hash_Value(g, query);
+
+        if (buckets[g][hash_value[0]] == NULL) continue;
+        for (auto Points: buckets[g][hash_value[0]]->points) {
+            iterations++;
+            int index = Points.first.first;
+            long double euc_dist = euclidean_dis(Lsh->data[index], query);
+            index += 1; // In input file the index starts from 1
+
+            if (euc_dist <= R) {
+                if (none_of(near_items.begin(), near_items.end(), [index](int item) { return index == item; })) {
+                    near_items.insert(near_items.begin(),std::pair<long double, int>(euc_dist,index));
+                }
+            }
+            if (iterations >= 100*L) break;
+        }
+    }
+
+    return near_items;
+}
+
 vector<int> Brute_by_range(vector<int> query) {
     int L = Lsh->get_L();
     int k = Lsh->get_k();

@@ -85,6 +85,8 @@ class LSH {
         vector<long long int> Specific_Hash_Value(int g, vector<int> item);
 
         void print_buckets();
+
+        vector<pair<long double,int>> Search_by_range2(vector<int> query) ;
 };
 
 void LSH_Insert_Points_To_Buckets(LSH* info);
