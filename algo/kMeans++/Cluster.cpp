@@ -427,6 +427,7 @@ int Cluster::reverse_assignment(void) {
 	while(Compare1(previous_clusters)) {
 
         radius = min_distance_between_centroids()/2;
+        for(int centroid = 0; centroid < number_of_clusters; centroid++) this->reverse_centroids[centroid].second.clear();
 
         // do a range search query for every centroid
         assigned_centroid.clear();
@@ -493,23 +494,21 @@ int Cluster::reverse_assignment(void) {
             // cout << radius << endl;
         }
 
+        // update the untracked vectors, and check for new changes
+        for (int i = 0; i < num_of_Items; i++) {
+            
+            // for each one not tracked, use direct assignment
+            if (assigned_centroid.at(i) == -1){
+                assigned_centroid.at(i) = nearest_centroid(data.at(i));
+                reverse_centroids[assigned_centroid.at(i)].second.push_back(i);
+            }
+        }
+
         //Update centroids
         for (int centroid = 0; centroid < number_of_clusters; centroid++) {
             previous_clusters[centroid].first = reverse_centroids[centroid].first;
             if(this->reverse_centroids[centroid].second.size() != 0)
                 reverse_centroids[centroid].first = Calculate_Mean(reverse_centroids[centroid].second);
-            this->reverse_centroids[centroid].second.clear();
-        }
-	}
-
-			
-    // update the untracked vectors, and check for new changes
-	for (int i = 0; i < num_of_Items; i++) {
-        
-	    // for each one not tracked, use direct assignment
-	    if (assigned_centroid.at(i) == -1){
-            assigned_centroid.at(i) = nearest_centroid(data.at(i));
-            reverse_centroids[assigned_centroid.at(i)].second.push_back(i);
         }
 	}
     
