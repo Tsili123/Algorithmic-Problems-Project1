@@ -365,7 +365,9 @@ int Cluster::reverse_assignment(void) {
             Lsh = new LSH(input_file, config_file, output_file, this->L, 5, this->k, 5, this->num_of_Items, dim_data(), this->data);
             LSH_Insert_Points_To_Buckets(Lsh);
         }else if(Method=="Hypercube"){
-                hypercube_ptr = new Hypercube(input_file,config_file, output_file, 5,k,1000,num_of_points(),5, dim_data(),this->number_of_probes,this->data);
+                vector<vector<int>> vec;
+                cout << this->data.size() << endl;
+                hypercube_ptr = new Hypercube(input_file,config_file, output_file, 5,this->k,1000,this->num_of_Items,5,dim_data() ,2, this->data);
         }
 
     vector<int> empty_vec;
@@ -395,8 +397,8 @@ int Cluster::reverse_assignment(void) {
 	// break the loop when all the balls contain no new vectors
 	while(unassinged != unassigned_prev){
 	// do a range search query for every centroid
-        assigned_centroid.clear();
-		assigned_centroid = assigned_new;		
+        //assigned_centroid.clear();
+		//assigned_centroid = assigned_new;		
         for(int i = 0; i < k; i++) {
             this->reverse_centroids[i].second.clear();
 			vector<pair<long double, int>> near_items;
@@ -464,6 +466,9 @@ int Cluster::reverse_assignment(void) {
             if(this->reverse_centroids[centroid].second.size() != 0)
                 reverse_centroids[centroid].first = Calculate_Mean(reverse_centroids[centroid].second);
         }
+
+        cout << "radius "<< radius << "\n";
+
 		// update the radius
 		radius *= 2;
 	}
