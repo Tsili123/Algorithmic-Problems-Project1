@@ -10,8 +10,10 @@ int main(int argc, char *argv[]) {
         cluster->Lloyd_method();
     else 
         cluster->reverse_assignment();
+
+    cout << "Finito" << endl;
     cluster->Silhouette();
     cluster->output();
-    //cluster->print();
+    cluster->print();
     return 0;
 }

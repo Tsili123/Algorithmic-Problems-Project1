@@ -40,7 +40,7 @@ class Euclidean_H_i {
 		}
 
         Euclidean_H_i(int k_, int dimlim_, long double W){
-			int dimlim = dimlim_;
+			dimlim = dimlim_;
 			k=k_;
 			// Initialize the vectors used for hashing
 			v.resize(k, std::vector<double>(dimlim));
@@ -78,7 +78,7 @@ class Euclidean_H_i {
 		} 
 		
 		int Specific_Hi(std::vector<int> item,int var) {
-			long int sum;
+			long int sum = 0;
 			for (int var2 = 1; var2 < dimlim; var2++) {
         		sum += item[var2] * v[var][var2];
     		}
@@ -147,7 +147,6 @@ class Hypercube{
             //measure the time that it takes to initialize the hypercube
             time_t start, finish;
             //fprintf(stdout, "Hypercube program with parameters:  k = %d, threshold = %d points_num = %d, space = %d, max_probes = %d,", k, threshold, points_num, space, max_probes);
-            cout << "All ok" << endl;
             time(&start);
 
             // we have a bitstring of k bits, thus the size of the hypercube table will be 2^k
@@ -162,7 +161,7 @@ class Hypercube{
 				sum /= (subpoints - point);
 			}
 
-            //Create hash functions for each bucket
+			//Create hash functions for each bucket
             this->H_i_ptr = new Euclidean_H_i(k,space, sum);
 
 			// Set size of H

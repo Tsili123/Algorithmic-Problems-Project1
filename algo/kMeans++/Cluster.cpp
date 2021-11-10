@@ -319,7 +319,7 @@ int Cluster::nearest_centroid(vector<int> vec) {
 	long int min_distance =  4294967291;
 	int nearest_centroid = -1;
 	// compute the distances to all the centroids
-	for (int i = 0; i < k; i++) {
+	for (int i = 0; i < number_of_clusters; i++) {
 		long int temp_distance = euclidean_dis(vec, this->reverse_centroids[i].first);
         //cout << " here error " << temp_distance <<endl;
 
@@ -343,8 +343,8 @@ long int  Cluster::min_distance_between_centroids(){
 
 	// brute force all the distances in order to find the smallest
 
-	for(int i = 0; i < k; i++){
-		for(int j = 0; j < k; j++){
+	for(int i = 0; i < number_of_clusters; i++){
+		for(int j = 0; j < number_of_clusters; j++){
 			if (i != j) {
 				long int temp_distance = euclidean_dis(this->reverse_centroids[i].first, this->reverse_centroids[j].first);
 				if (temp_distance < min_distance)
@@ -359,14 +359,13 @@ int Cluster::reverse_assignment(void) {
 
     auto begin = high_resolution_clock::now();
     
-      this->reverse_centroids.reserve(this->k);
+      this->reverse_centroids.reserve(number_of_clusters);
       if(Method=="LSH"){
             //we dont care about R,query file and  N here
             Lsh = new LSH(input_file, config_file, output_file, this->L, 5, this->k, 5, this->num_of_Items, dim_data(), this->data);
             LSH_Insert_Points_To_Buckets(Lsh);
         }else if(Method=="Hypercube"){
                 vector<vector<int>> vec;
-                cout << this->data.size() << endl;
                 hypercube_ptr = new Hypercube(input_file,config_file, output_file, 5,this->k,1000,this->num_of_Items,5,dim_data() ,2, this->data);
         }
 
@@ -394,15 +393,13 @@ int Cluster::reverse_assignment(void) {
 	// keep track of unassinged points
 	int unassinged = 4294967291 - 1;
 
-    vector<vector<int>> previous_clusters(number_of_clusters, empty_vec);
-
 	// break the loop when all the balls contain no new vectors
 	while(unassinged != unassigned_prev){
 	// do a range search query for every centroid
         assigned_centroid.clear();
         assigned_centroid = assigned_new;
-		
-        for(int i = 0; i < k; i++) {
+
+        for(int i = 0; i < number_of_clusters; i++) {
             this->reverse_centroids[i].second.clear();
 			vector<pair<long double, int>> near_items;
             list<int> neighbors;
@@ -427,8 +424,6 @@ int Cluster::reverse_assignment(void) {
                 neighbors_dists.clear();
             }
 
-            //cout << " near items size : " << near_items.size() << endl;
-
             for (auto iter = near_items.begin(); iter != near_items.end(); iter++){
 
 				// get the current vector
@@ -438,9 +433,7 @@ int Cluster::reverse_assignment(void) {
                     // chcek if its distance from the current centroid, is less than the previous' one
                     //cout << "size1 ok" << current_vector << endl;
 					int assigned_prev = assigned_centroid.at(current_vector); 
-                    //cout << "size2 ok" << current_vector << endl;
 					int prev_distance = euclidean_dis(data.at(current_vector), this->reverse_centroids[assigned_prev].first);
-                    //cout << "size3 ok" << current_vector << endl;
 					int new_distance = iter->first;
 
 					// if it is, it is closest to the current centroid, thus change the asssigned value in the temp vector
@@ -456,8 +449,6 @@ int Cluster::reverse_assignment(void) {
 					assigned_centroid.at(current_vector) = i;
 				}
 			}
-
-
 		}
 
 		// update the unassigned vectors count
