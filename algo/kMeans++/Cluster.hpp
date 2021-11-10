@@ -27,7 +27,7 @@ using std::chrono::duration;
 
 class Cluster {
     private:
-        bool complete;
+        bool complete = false;
         string Method;
         int L=3; // num of hash tables for LSH
         int k=4; // k of LSH

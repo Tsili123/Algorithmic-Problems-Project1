@@ -520,6 +520,7 @@ void Cluster::output() {
             }
             Output << points << ", ";
         }
+        cout << this->complete << endl;
         if (this->complete) {
             Output << "Items: ";
             for (auto points: centroid.second) {

@@ -102,7 +102,6 @@ vector<vector<int>> store_Cluster_data(int argc,char** argv){
             complete = true;
         }
         else if(strcmp(argv[i], "-m")==0){
-            complete = true;
             i++;
             Method = string(argv[i]);
         }
