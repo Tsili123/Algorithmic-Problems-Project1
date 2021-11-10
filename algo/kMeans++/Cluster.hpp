@@ -68,6 +68,8 @@ class Cluster {
         void Lloyd_method();
         vector<int> Calculate_Mean(vector<int>);
         bool Compare(vector<vector<int>>);
+        bool Compare1(vector<pair<vector<int>, vector<int>>>);
+        bool Check(vector<pair<vector<int>, vector<int>>>);
         void Silhouette();
         string get_method(void){return Method;};
         void read_config(string );

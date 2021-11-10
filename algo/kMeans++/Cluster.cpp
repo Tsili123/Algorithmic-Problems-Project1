@@ -125,9 +125,7 @@ vector<int> Cluster::Calculate_Mean(vector<int> near_points) {
     vector<int> centroid(size, 0);
     for (auto point: near_points) {
         for(int i = 1; i < size; i++) {
-            // cout << sum[i] << ", ";
             centroid[i] += this->data[point][i];
-            // cout << sum[i] << ", " << (long double) this->data[point][i] << endl;
         }
     }
 
@@ -290,7 +288,6 @@ void Cluster::Silhouette() {
         }
 
         sil[cluster] /= size_of_cluster;
-        // cout << cluster << ": " << sil[cluster] << endl;
     }
 
     this->s = sil;
@@ -355,6 +352,38 @@ long int  Cluster::min_distance_between_centroids(){
 	return min_distance;
 }
 
+
+// This function compares all new clusters to their previous
+// if the clusters have not changed much then return false else return true
+bool Cluster::Compare1(vector<pair<vector<int>, vector<int>>> previous_clusters) {
+    int sum_of_diff_centroids = 0;
+    for (int centroid = 0; centroid < number_of_clusters; centroid++) {
+        int size = previous_clusters[centroid].first.size();
+        if (size == 0) return true;
+        long double dist = euclidean_dis(previous_clusters[centroid].first, reverse_centroids[centroid].first);
+        if (dist < 0.1)
+            sum_of_diff_centroids++;
+    }
+
+    if (sum_of_diff_centroids >= number_of_clusters/2) return false;
+    else return true;
+}
+
+bool Cluster::Check(vector<pair<vector<int>, vector<int>>> previous_clusters) {
+    int sum_of_diff_points = 0;
+    for (int centroid = 0; centroid < number_of_clusters; centroid++) {
+        if (previous_clusters[centroid].second.size() != reverse_centroids[centroid].second.size()) {
+            return true;
+        }
+
+        if (reverse_centroids[centroid].second.size() == 0) sum_of_diff_points++;
+    }
+    
+    if (sum_of_diff_points == number_of_clusters) return true;
+
+    return false;
+}
+
 int Cluster::reverse_assignment(void) {
 
     auto begin = high_resolution_clock::now();
@@ -365,8 +394,7 @@ int Cluster::reverse_assignment(void) {
             Lsh = new LSH(input_file, config_file, output_file, this->L, 5, this->k, 5, this->num_of_Items, dim_data(), this->data);
             LSH_Insert_Points_To_Buckets(Lsh);
         }else if(Method=="Hypercube"){
-                vector<vector<int>> vec;
-                hypercube_ptr = new Hypercube(input_file,config_file, output_file, 5,this->k,1000,this->num_of_Items,5,dim_data() ,2, this->data);
+            hypercube_ptr = new Hypercube(input_file,config_file, output_file, 5, this->number_of_hypercube_dimensions, this->max_number_M_hypercube,this->num_of_Items,5,dim_data() , this->number_of_probes, this->data);
         }
 
     vector<int> empty_vec;
@@ -393,77 +421,85 @@ int Cluster::reverse_assignment(void) {
 	// keep track of unassinged points
 	int unassinged = 4294967291 - 1;
 
+    vector<pair<vector<int>, vector<int>>> previous_clusters(number_of_clusters, {empty_vec, empty_vec});
+
 	// break the loop when all the balls contain no new vectors
-	while(unassinged != unassigned_prev){
-	// do a range search query for every centroid
+	while(Compare1(previous_clusters)) {
+
+        radius = min_distance_between_centroids()/2;
+
+        // do a range search query for every centroid
         assigned_centroid.clear();
         assigned_centroid = assigned_new;
 
-        for(int i = 0; i < number_of_clusters; i++) {
-            this->reverse_centroids[i].second.clear();
-			vector<pair<long double, int>> near_items;
-            list<int> neighbors;
-            list<double> neighbors_dists;
-            // the type of range search depends on what the user wants
-			if (Method == "LSH"){
-                //cout << " lsh items size : " << this->reverse_centroids[i].first.size() << endl;
-                near_items = Lsh->Search_by_range2(this->reverse_centroids[i].first,radius);
-            }
-			else if (Method == "Hypercube"){
-                //near items have format (long double,int) -> distance, position in data vectors
-                hypercube_ptr->RNeighbors(this->reverse_centroids[i].first, radius,neighbors,neighbors_dists);
-
-                auto itA = neighbors_dists.begin();
-                auto itB = neighbors.begin();	
-                while(itA != neighbors_dists.end() || itB != neighbors.end()){
-                    near_items.push_back(make_pair(*itA,*itB));
-                     ++itA;
-                     ++itB;
+        while(Check(previous_clusters)) {
+            for(int i = 0; i < number_of_clusters; i++) {
+                previous_clusters[i].second = reverse_centroids[i].second;
+                // this->reverse_centroids[i].second.clear();
+                vector<pair<long double, int>> near_items;
+                list<int> neighbors;
+                list<double> neighbors_dists;
+                // the type of range search depends on what the user wants
+                if (Method == "LSH"){
+                    near_items = Lsh->Search_by_range2(this->reverse_centroids[i].first,radius);
                 }
-                neighbors.clear();
-                neighbors_dists.clear();
-            }
+                else if (Method == "Hypercube"){
+                    //near items have format (long double,int) -> distance, position in data vectors
+                    hypercube_ptr->RNeighbors(this->reverse_centroids[i].first, radius,neighbors,neighbors_dists);
 
-            for (auto iter = near_items.begin(); iter != near_items.end(); iter++){
+                    auto itA = neighbors_dists.begin();
+                    auto itB = neighbors.begin();	
+                    while(itA != neighbors_dists.end() || itB != neighbors.end()){
+                        near_items.push_back(make_pair(*itA,*itB));
+                        ++itA;
+                        ++itB;
+                    }
+                    neighbors.clear();
+                    neighbors_dists.clear();
+                }
 
-				// get the current vector
-				int current_vector = iter->second;
-                //cout << "size0 ok" << current_vector << endl;
-				if(assigned_centroid.at(current_vector) != -1) {
-                    // chcek if its distance from the current centroid, is less than the previous' one
-                    //cout << "size1 ok" << current_vector << endl;
-					int assigned_prev = assigned_centroid.at(current_vector); 
-					int prev_distance = euclidean_dis(data.at(current_vector), this->reverse_centroids[assigned_prev].first);
-					int new_distance = iter->first;
+                for (auto iter = near_items.begin(); iter != near_items.end(); iter++){
 
-					// if it is, it is closest to the current centroid, thus change the asssigned value in the temp vector
-					if (new_distance < prev_distance){
-                        this->reverse_centroids[assigned_prev].second.erase(remove(this->reverse_centroids[assigned_prev].second.begin(), this->reverse_centroids[assigned_prev].second.end(), current_vector), this->reverse_centroids[assigned_prev].second.end());
+                    // get the current vector
+                    int current_vector = iter->second;
+                    if(assigned_centroid.at(current_vector) != -1) {
+                        // chcek if its distance from the current centroid, is less than the previous' one
+                        int assigned_prev = assigned_centroid.at(current_vector); 
+                        int prev_distance = euclidean_dis(data.at(current_vector), this->reverse_centroids[assigned_prev].first);
+                        int new_distance = iter->first;
+
+                        // if it is, it is closest to the current centroid, thus change the asssigned value in the temp vector
+                        if (new_distance < prev_distance){
+                            this->reverse_centroids[assigned_prev].second.erase(remove(this->reverse_centroids[assigned_prev].second.begin(), this->reverse_centroids[assigned_prev].second.end(), current_vector), this->reverse_centroids[assigned_prev].second.end());
+                            this->reverse_centroids[i].second.push_back(current_vector); 
+                            assigned_centroid.at(current_vector) = i;
+                        }
+                    }// if it has been already assigned
+                    else if(assigned_centroid.at(current_vector) == -1){
                         this->reverse_centroids[i].second.push_back(current_vector); 
+                        // temporarly assign it to this centroid
                         assigned_centroid.at(current_vector) = i;
                     }
-				}// if it has been already assigned
-				else if(assigned_centroid.at(current_vector) == -1){
-                    this->reverse_centroids[i].second.push_back(current_vector); 
-	                // temporarly assign it to this centroid
-					assigned_centroid.at(current_vector) = i;
-				}
-			}
-		}
+                }
+            }
 
-		// update the unassigned vectors count
-		unassigned_prev = unassinged;
-		unassinged = unassigned_count();
+            // update the unassigned vectors count
+            unassigned_prev = unassinged;
+            unassinged = unassigned_count();
+
+            // update the radius
+            radius *= 2;
+
+            // cout << radius << endl;
+        }
 
         //Update centroids
         for (int centroid = 0; centroid < number_of_clusters; centroid++) {
-            //cout << "size second" << this->reverse_centroids[centroid].second.size() << endl;
+            previous_clusters[centroid].first = reverse_centroids[centroid].first;
             if(this->reverse_centroids[centroid].second.size() != 0)
                 reverse_centroids[centroid].first = Calculate_Mean(reverse_centroids[centroid].second);
+            this->reverse_centroids[centroid].second.clear();
         }
-
-		// update the radius
-		radius *= 2;
 	}
 
 			
