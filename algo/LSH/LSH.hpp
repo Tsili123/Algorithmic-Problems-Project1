@@ -86,7 +86,7 @@ class LSH {
 
         void print_buckets();
 
-        vector<pair<long double,int>> Search_by_range2(vector<int> query) ;
+        vector<pair<long double,int>> Search_by_range2(vector<int> query,long int R_custom) ;
 };
 
 void LSH_Insert_Points_To_Buckets(LSH* info);

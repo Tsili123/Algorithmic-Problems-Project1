@@ -5,6 +5,7 @@ using std::chrono::high_resolution_clock;
 using std::chrono::duration;
 
 extern Cluster *cluster;
+extern LSH *Lsh;
 
 Cluster::Cluster(string input, string config, string out, bool comp, string method)
                 :input_file(input), config_file(config), output_file(out), complete(comp), Method(method) {
@@ -131,7 +132,7 @@ vector<int> Cluster::Calculate_Mean(vector<int> near_points) {
     }
 
     for (int i = 1; i < size; i++) {
-        centroid[i] = centroid[i]/T;
+            centroid[i] = centroid[i]/T;
     }
 
     return centroid;
@@ -209,12 +210,20 @@ void Cluster::Lloyd_method() {
 void Cluster::Silhouette() {
     vector<long double> sil(number_of_clusters, 0);
     auto begin = high_resolution_clock::now();
+    // The first vector is the centroid and the second is a vector of indexes
+    vector<pair<vector<int>, vector<int>>> temp;
+    if(cluster->get_method() == "Classic" || cluster->get_method() == "Lloyd" ){
+        temp = this->Lloyd;
+    }else{
+        temp = reverse_centroids;
+    }
 
     unordered_map<string, long double> dists;
 
     for (int cluster = 0; cluster < number_of_clusters; cluster++) {
-        int size_of_cluster = Lloyd[cluster].second.size();
-        vector<int> Points = Lloyd[cluster].second;
+
+        int size_of_cluster = temp[cluster].second.size();
+        vector<int> Points = temp[cluster].second;
         for (auto i: Points) {
             // Calculate average distance
             long double a = 0.0;
@@ -244,7 +253,7 @@ void Cluster::Silhouette() {
             int sec_cluster = -1;
             for (int second_cluster = 0; second_cluster < number_of_clusters; second_cluster++) {
                 if (cluster != second_cluster) {
-                    long double point_dist = euclidean_dis(this->data[i], Lloyd[second_cluster].first);
+                    long double point_dist = euclidean_dis(this->data[i], temp[second_cluster].first);
                     if (dist > point_dist) {
                         sec_cluster = second_cluster;
                         dist = point_dist;
@@ -254,7 +263,7 @@ void Cluster::Silhouette() {
 
             // Calculate average distance of second cluster
             long double b = 0.0;
-            for (auto j: Lloyd[sec_cluster].second) {
+            for (auto j: temp[sec_cluster].second) {
                 if (i != j) {
                     unordered_map<string, long double>::iterator it = dists.find(to_string(i)+to_string(j));
                     if (it != dists.end()) {
@@ -273,7 +282,7 @@ void Cluster::Silhouette() {
                 }
             }
 
-            b /= (Lloyd[sec_cluster].second.size()-1);
+            b /= (temp[sec_cluster].second.size()-1);
 
             // Calculate Silhouette
             sil[cluster] += (b - a) / (b > a ? b : a);
@@ -294,55 +303,50 @@ void Cluster::Silhouette() {
 
 
 // compute how many unassigned vectors we've got, for the reverse assignement method
-int Cluster::unassigned_count(vector<int> assigned){
+int Cluster::unassigned_count(){
 	int count = 0;
-	for(int i = 0; i < points_num; i++)
-		if (assigned.at(i) == -1) 
+	for(int i = 0; i < num_of_Items; i++){
+		if (assigned_centroid.at(i) == -1) 
 			count++;
 	}
 	return count;
 }
 
-// Compute the Manhatan Distance between 2 vectors in the  dimension
-int Cluster::Manhatan_Distance(std::vector<int>x, std::vector<int>y, int dim){
-	int result;
-	for (int i = 0; i < dim; i++) {
-		result += std::abs(x[i] - y[i]);
-	}
-	return result;
-}
 
 //compute the nearest center for a given vector
 
 int Cluster::nearest_centroid(vector<int> vec) {
-	int min_distance =  4294967291;
+	long int min_distance =  4294967291;
 	int nearest_centroid = -1;
 	// compute the distances to all the centroids
 	for (int i = 0; i < k; i++) {
-		int temp_distance = Manhatan_Distance(vec, centroids.at(i), space_dim);
+		long int temp_distance = euclidean_dis(vec, this->reverse_centroids[i].first);
+        //cout << " here error " << temp_distance <<endl;
+
 		// set it as min
 		if (temp_distance < min_distance) {
 			min_distance = temp_distance;
 			nearest_centroid = i;
 		}
 	}
-	assert(nearest != -1);
+    //cout << " nearest cetroid " << nearest_centroid <<endl;
+	assert(nearest_centroid != -1);
 
-	return nearest;
+	return nearest_centroid;
 };
 
 // Compute the minimum of the distances of the centroids. Needed for the initialization of the radius in reverse assignment
-int  Cluster::min_distance_between_centroids(){
+long int  Cluster::min_distance_between_centroids(){
 
 	// initialize the minimum distance
-	int min_distance = 4294967291;
+	long int min_distance = 4294967291;
 
 	// brute force all the distances in order to find the smallest
 
 	for(int i = 0; i < k; i++){
 		for(int j = 0; j < k; j++){
 			if (i != j) {
-				int temp_distance = Manhatan_Distance(centroids.at(i), centroids.at(j), space_dim);
+				long int temp_distance = euclidean_dis(this->reverse_centroids[i].first, this->reverse_centroids[j].first);
 				if (temp_distance < min_distance)
 					min_distance = temp_distance;
 			}
@@ -351,13 +355,33 @@ int  Cluster::min_distance_between_centroids(){
 	return min_distance;
 }
 
-int reverse_assignment(void) {
+int Cluster::reverse_assignment(void) {
+
+    auto begin = high_resolution_clock::now();
     
+      this->reverse_centroids.reserve(this->k);
+      if(Method=="LSH"){
+            //we dont care about R,query file and  N here
+            Lsh = new LSH(input_file, config_file, output_file, this->L, 5, this->k, 5, this->num_of_Items, dim_data(), this->data);
+            LSH_Insert_Points_To_Buckets(Lsh);
+        }else if(Method=="Hypercube"){
+                hypercube_ptr = new Hypercube(input_file,config_file, output_file, 5,k,1000,num_of_points(),5, dim_data(),this->number_of_probes,this->data);
+        }
+
+    vector<int> empty_vec;
+    empty_vec.clear();
+    for (auto centroid: centroids) {
+        reverse_centroids.push_back(make_pair(this->data[centroid], empty_vec));
+    }
+    centroids.clear();
+
 	// initial radius
-	int radius = min_distance_between_centroids()/2;
+	long int radius = min_distance_between_centroids()/2;
 
     // keep a vector of the new assignments
-	vector<int> assigned_new(points_num, -1);
+	vector<int> assigned_new(num_of_Items, -1);
+
+    assigned_centroid = assigned_new;
 
 	// keep track of the changes
 	int changes = 0;
@@ -371,139 +395,94 @@ int reverse_assignment(void) {
 	// break the loop when all the balls contain no new vectors
 	while(unassinged != unassigned_prev){
 	// do a range search query for every centroid
-				
+        assigned_centroid.clear();
+		assigned_centroid = assigned_new;		
         for(int i = 0; i < k; i++) {
-
+            this->reverse_centroids[i].second.clear();
 			vector<pair<long double, int>> near_items;
+            list<int> neighbors;
+            list<double> neighbors_dists;
             // the type of range search depends on what the user wants
-			if (assignment_method == "reverse_LSH"){
-                near_items = lsh_ptr->Search_by_range2(centroids.at(i));
+			if (Method == "LSH"){
+                //cout << " lsh items size : " << this->reverse_centroids[i].first.size() << endl;
+                near_items = Lsh->Search_by_range2(this->reverse_centroids[i].first,radius);
             }
-			else if (assignment_method == "reverse_Hypercube"){
+			else if (Method == "Hypercube"){
                 //near items have format (long double,int) -> distance, position in data vectors
-                hypercube_ptr->RNeighbors(centroids.at(i), radius, near_items);
+                hypercube_ptr->RNeighbors(this->reverse_centroids[i].first, radius,neighbors,neighbors_dists);
+
+                auto itA = neighbors_dists.begin();
+                auto itB = neighbors.begin();	
+                while(itA != neighbors_dists.end() || itB != neighbors.end()){
+                    near_items.push_back(make_pair(*itA,*itB));
+                     ++itA;
+                     ++itB;
+                }
+                neighbors.clear();
+                neighbors_dists.clear();
             }
-					
+
+            //cout << " near items size : " << near_items.size() << endl;
+
             for (auto iter = near_items.begin(); iter != near_items.end(); iter++){
 
 				// get the current vector
 				int current_vector = iter->second;
-
-				// if it is still unassigned
-				if(assigned_new.at(current_vector) != -1) {
+                //cout << "size0 ok" << current_vector << endl;
+				if(assigned_centroid.at(current_vector) != -1) {
                     // chcek if its distance from the current centroid, is less than the previous' one
-					int assigned_prev = assigned_new.at(current_vector); 
-					int prev_distance = Manhatan_Distance(data.at(current_vec), centroids.at(assigned_prev), space_dim);
+                    //cout << "size1 ok" << current_vector << endl;
+					int assigned_prev = assigned_centroid.at(current_vector); 
+                    //cout << "size2 ok" << current_vector << endl;
+					int prev_distance = euclidean_dis(data.at(current_vector), this->reverse_centroids[assigned_prev].first);
+                    //cout << "size3 ok" << current_vector << endl;
 					int new_distance = iter->second;
 
 					// if it is, it is closest to the current centroid, thus change the asssigned value in the temp vector
-					if (new_distance < prev_distance)
-						assigned_new.at(current_vector) = i;
+					if (new_distance < prev_distance){
+                        this->reverse_centroids[i].second.push_back(current_vector); 
+                        assigned_centroid.at(current_vector) = i;
+                    }
 				}// if it has been already assigned
-				else if(assigned_new.at(current_vector) == -1){
-
+				else if(assigned_centroid.at(current_vector) == -1){
+                    this->reverse_centroids[i].second.push_back(current_vector); 
 	                // temporarly assign it to this centroid
-					assigned_new.at(current_vector) = i;
+					assigned_centroid.at(current_vector) = i;
 				}
 			}
+
+
 		}
 
 		// update the unassigned vectors count
 		unassigned_prev = unassinged;
-		unassinged = unassigned_count(new_assigned);
+		unassinged = unassigned_count();
 
+        //Update centroids
+        for (int centroid = 0; centroid < number_of_clusters; centroid++) {
+            //cout << "size second" << this->reverse_centroids[centroid].second.size() << endl;
+            if(this->reverse_centroids[centroid].second.size() != 0)
+                reverse_centroids[centroid].first = Calculate_Mean(reverse_centroids[centroid].second);
+        }
 		// update the radius
 		radius *= 2;
 	}
 
 			
     // update the untracked vectors, and check for new changes
-	for (int i = 0; i < points_num; i++) {
+	for (int i = 0; i < num_of_Items; i++) {
         
 	    // for each one not tracked, use direct assignment
-	    if (assigned_new.at(i) == -1)
-			assigned_new.at(i) = nearest_centroid(data.at(i));
-		
-        // check for changes
-		if (assigned_centroid.at(i) != assigned_new.at(i))
-			changes++;
+	    if (assigned_centroid.at(i) == -1){
+            assigned_centroid.at(i) = nearest_centroid(data.at(i));
+            reverse_centroids[assigned_centroid.at(i)].second.push_back(i);
+        }
 	}
     
-	// update the assigned vector
-	assigned_centroid = assigned_new;
-	return changes;
+	auto end = high_resolution_clock::now();
+    Cluster_time = end - begin;
+
 };
-
-int median(vector <int> a) {
-		int median_index = a.size() / 2;
-		std::nth_element(a.begin(), a.begin() + median_index, a.end());
-		return a.at(median_index);
-	}
-
-// update the centroids with the kmedian method
-void update(void) {
-	
-    // we want to keep a map containing the true values of the vectors, in order to find the median
-	//vector<vector<vector<int>>> centroids_map(k);
-
-    vector<pair<vector<int>,vector<int>>> centroids_map(k);
-			
-    // insert the vectors in the map
-	for (int i = 0; i < points_num; i++) {
-		int assigned = assigned_centroid.at(i);
-		//centroids_map.at(assigned).push_back(data.at(i));
-        centroids_map[assigned].second.push_back(data.at(i));
-	}
-	
-    // for each centroid 
-	for (int i = 0; i < k; i++) {
-        // for each one of its dimenions
-        for (int j = 0; j < space_dim; j++) {
-					
-            vector<int> current_component;
-			
-            // parse through all of its assigned vectors in order to find the median
-		    for (int n = 0; n < centroids_map[i].second.size(); n++) {
-				    
-                    current_component.push_back(centroids_map[i].second.at(n).at(j));
-			}
-				
-            
-            centroids.at(i).at(j) = median(current_component);
-		}
-	}
-};
-
-
-// run the clustering algorithm
-void run_clusters(void) {
-			
-    //// create a temporary map to store the vectors that belong to each centroid
-			//std::vector<std::list<int>> centroids_map(k);
-
-        // Step 1: Initialize the centroids using init++
-		kMeanspp_Initialization();
-
-		// set manually a threshold for stoping the algorithm
-		int threshold = points_num / 1000;
-			
-        // number of changed vector. It is going to change in each itteration
-		int changed =  4294967291;
-
-		// repeat until the threshold is not reached
-			
-        while (changed > threshold) {
-				
-            // Step 2: call the appropriate method of assignment
-			if (assignment_method == "lloyds")
-				//changed = assignment_lloyds();
-			else 
-				changed = reverse_assignment();
-			
-			// Step 3: Update the centroids
-			update();
-		}
-}
 
 void Cluster::print() {
     cout << "number_of_clusters: " << number_of_clusters << endl;
@@ -515,6 +494,13 @@ void Cluster::print() {
 }
 
 void Cluster::output() {
+    vector<pair<vector<int>, vector<int>>> temp;
+    if(cluster->get_method() == "Classic" || cluster->get_method() == "Lloyd" ){
+        temp = this->Lloyd;
+    }else{
+        temp = reverse_centroids;
+    }
+    
     ofstream Output;
     Output.open (this->output_file, ofstream::out | ofstream::trunc);
     Output << "Algorithm: ";
@@ -524,7 +510,7 @@ void Cluster::output() {
     Output << endl;
 
     int counter = 1;
-    for (auto centroid: this->Lloyd) {
+    for (auto centroid: temp) {
         bool first = true;
         Output << "CLUSTER-" << counter << " {size: " << centroid.second.size() << ", centroid: ";
         for (auto points: centroid.first) {
@@ -556,27 +542,4 @@ void Cluster::output() {
     Output << stotal/this->number_of_clusters << "]" << endl;
 
     Output.close();
-}
-
-// Calculate Euclidean Distance
-long double euclidean_dis(vector<int> vec1, vector<int> vec2) {
-    long double dist=0.0;
-
-    auto itA = vec1.begin();
-    auto itB = vec2.begin();
-    ++itA;
-    ++itB;
-
-    while(itA != vec1.end() || itB != vec2.end())
-    {
-        dist = dist + (itA[0]-itB[0])*(itA[0]-itB[0]);
-        if(itA != vec1.end()) {
-            ++itA;
-        }
-        if(itB != vec2.end()) {
-            ++itB;
-        }
-    }
-
-	return sqrt(dist);
 }

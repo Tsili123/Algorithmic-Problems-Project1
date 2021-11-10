@@ -15,11 +15,15 @@
 #include <chrono>
 
 #include "./Handling_input/Handling_input.hpp"
-
+// #include "../Handling_input/Handling_input_cube.hpp"
+#include "../Handling_input/Handling_input.hpp"
+#include "../LSH/LSH.hpp"
+#include "../LSH/hypercube.hpp"
 #define NUM 1.79769e+308 // Biggest double num that can be defined
 
 using std::chrono::high_resolution_clock;
 using std::chrono::duration;
+
 
 class Cluster {
     private:
@@ -42,31 +46,16 @@ class Cluster {
         // The first vector is the centroid and the second is a vector of indexes
         vector<pair<vector<int>, vector<int>>> Lloyd;
 
-        /** assignment method chosen by the user. Options are: --------
-         * 
-         * - lloyds
-        - reverse_LSH
-		- reverse_Hypercube 
-		 */
-
-		string assignment_method;
-		
-		// vectors of the centroids
-		// vector<vector<T>> centroids;
-
 		// vector that hols the index of the centroid that the current index's vector is assigned to
-		std::vector<int> assigned_centroid;
+		vector<int> assigned_centroid;
+
+        vector<pair<vector<int>, vector<int>>> reverse_centroids;
 
 		// in case of lsh, we need these extra variables
-		int lsh_l;
-		int lsh_k;
-		// LSH* lsh_instant;
+		//LSH* lsh_ptr;
 
 		// in case of hypercube, we need these extra variables
-		int hc_M;
-		int hc_k;
-		int hc_probes;
-		// Hypercube* hc_instant;
+		Hypercube* hypercube_ptr;
         //---------
 
     public:
@@ -80,11 +69,16 @@ class Cluster {
         vector<int> Calculate_Mean(vector<int>);
         bool Compare(vector<vector<int>>);
         void Silhouette();
-
+        string get_method(void){return Method;};
         void read_config(string );
 
         void output();
         void print();
+
+        int unassigned_count();
+        int nearest_centroid(vector<int> vec);
+        long int  min_distance_between_centroids(void);
+        int reverse_assignment(void);
 };
 
 long double euclidean_dis(vector<int> vec1, vector<int> vec2);
