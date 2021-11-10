@@ -146,15 +146,15 @@ class Hypercube{
 			
             //measure the time that it takes to initialize the hypercube
             time_t start, finish;
-            fprintf(stdout, "Hypercube program with parameters:  k = %d, threshold = %d points_num = %d, space = %d, max_probes = %d,", k, threshold, points_num, space, max_probes);
-            
+            //fprintf(stdout, "Hypercube program with parameters:  k = %d, threshold = %d points_num = %d, space = %d, max_probes = %d,", k, threshold, points_num, space, max_probes);
+            cout << "All ok" << endl;
             time(&start);
 
             // we have a bitstring of k bits, thus the size of the hypercube table will be 2^k
             buckets_num = (int)pow(2, k);
 
 			long double sum = 0;
-			long int subpoints = this->points_num * 5/100;
+			int subpoints = this->points_num * 5/100;
 			for (int point = 1; point < subpoints - 1; point++) {
 				for (int second_point = point; second_point < subpoints; second_point++) {
 					sum += euclidean_dis(data_vectors[point], data_vectors[second_point]);
@@ -183,6 +183,7 @@ class Hypercube{
                 hypercube.push_back(temp_list);
             }
 			
+			//cout << points_num << endl;
 			//insert all of the points into the hypercube
 			for (int i = 0; i < points_num; i++) {
 				int bucket_id = hypercube_hash(data_vectors.at(i));
@@ -208,6 +209,7 @@ class Hypercube{
 			// hash k times
 			for(int i=0;i<this->k;i++){
                     // hash with the i-th hash fn
+
 					curr_Hi = this->H_i_ptr->Specific_Hi(vec_point,i);
 					// Find if H[i] value exists 
         			iterh = this->Hi_map[i].find(curr_Hi);
