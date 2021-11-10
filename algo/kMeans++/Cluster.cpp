@@ -394,11 +394,14 @@ int Cluster::reverse_assignment(void) {
 	// keep track of unassinged points
 	int unassinged = 4294967291 - 1;
 
+    vector<vector<int>> previous_clusters(number_of_clusters, empty_vec);
+
 	// break the loop when all the balls contain no new vectors
 	while(unassinged != unassigned_prev){
 	// do a range search query for every centroid
-        //assigned_centroid.clear();
-		//assigned_centroid = assigned_new;		
+        assigned_centroid.clear();
+        assigned_centroid = assigned_new;
+		
         for(int i = 0; i < k; i++) {
             this->reverse_centroids[i].second.clear();
 			vector<pair<long double, int>> near_items;
@@ -438,10 +441,11 @@ int Cluster::reverse_assignment(void) {
                     //cout << "size2 ok" << current_vector << endl;
 					int prev_distance = euclidean_dis(data.at(current_vector), this->reverse_centroids[assigned_prev].first);
                     //cout << "size3 ok" << current_vector << endl;
-					int new_distance = iter->second;
+					int new_distance = iter->first;
 
 					// if it is, it is closest to the current centroid, thus change the asssigned value in the temp vector
 					if (new_distance < prev_distance){
+                        this->reverse_centroids[assigned_prev].second.erase(remove(this->reverse_centroids[assigned_prev].second.begin(), this->reverse_centroids[assigned_prev].second.end(), current_vector), this->reverse_centroids[assigned_prev].second.end());
                         this->reverse_centroids[i].second.push_back(current_vector); 
                         assigned_centroid.at(current_vector) = i;
                     }
@@ -466,8 +470,6 @@ int Cluster::reverse_assignment(void) {
             if(this->reverse_centroids[centroid].second.size() != 0)
                 reverse_centroids[centroid].first = Calculate_Mean(reverse_centroids[centroid].second);
         }
-
-        cout << "radius "<< radius << "\n";
 
 		// update the radius
 		radius *= 2;
@@ -525,7 +527,7 @@ void Cluster::output() {
             }
             Output << points << ", ";
         }
-        cout << this->complete << endl;
+
         if (this->complete) {
             Output << "Items: ";
             for (auto points: centroid.second) {
