@@ -13,7 +13,7 @@ LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_,
         data = Data;
         W = Calculate_w();
 
-        hashtable_size = n/4;
+        hashtable_size = n/8;
         Hash_Funs = new Euclidean_Hash_Function[L];
          //Declaration of hash tables...
         hashtables = new Bucket**[L];
