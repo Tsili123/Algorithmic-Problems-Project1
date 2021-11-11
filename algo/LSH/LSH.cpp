@@ -135,7 +135,8 @@ void Print_values() {
 int LSH::Calculate_w() {
     long double sum = 0;
     long int subpoints = this->points_num * 5/100;
-    for (int point = 1; point < subpoints - 1; point++) {
+    if (subpoints == 0) subpoints = this->points_num/2;
+    for (int point = 0; point < subpoints - 1; point++) {
         for (int second_point = point; second_point < subpoints; second_point++) {
             sum += euclidean_dis(this->data[point], this->data[second_point]);
         }
