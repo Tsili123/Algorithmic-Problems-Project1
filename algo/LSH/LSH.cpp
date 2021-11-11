@@ -34,6 +34,26 @@ LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_,
         }while(j < k);
     }
 
+LSH::~LSH() {
+    if (data.size() > 0) {
+        auto it_D = data.begin();
+        it_D++;
+        data.erase(it_D, data.end());
+    }
+
+    if (hashtables) {
+        for(int i=0;i<L;i++) {
+            for (int j = 0; j < hashtable_size; j++)
+                delete hashtables[i][j];
+
+            delete [] hashtables[i];
+        }
+        delete [] hashtables;
+    }
+
+    if (Hash_Funs) delete [] Hash_Funs;
+}
+
 void LSH::print_buckets() {
     for(int j=0; j < this->L; j++) {
         for(long int i=0; i < this->hashtable_size - 2498; i++){
@@ -153,8 +173,13 @@ Euclidean_Hash_Function::Euclidean_Hash_Function(int k, int dim) {
 }
 
 Euclidean_Hash_Function::~Euclidean_Hash_Function() {
-    v.clear();
-    t.clear();
+    auto it_v = v.begin();
+    it_v++;
+    v.erase(it_v, v.end());
+
+    auto it_t = t.begin();
+    it_t++;
+    t.erase(it_t, t.end());
 }
 
 vector<pair<long double, int>> Nearest_N_search(vector<int> query) {

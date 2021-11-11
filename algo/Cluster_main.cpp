@@ -15,5 +15,7 @@ int main(int argc, char *argv[]) {
     cluster->Silhouette();
     cluster->output();
     cluster->print();
+    if (Lsh) delete(Lsh);
+    delete(cluster);
     return 0;
 }

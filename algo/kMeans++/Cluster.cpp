@@ -14,6 +14,34 @@ Cluster::Cluster(string input, string config, string out, bool comp, string meth
                     this->num_of_Items = num_of_points();
                 }
 
+Cluster::~Cluster() {
+    if (s.size() > 0) {
+        auto it = s.begin();
+        it++;
+        s.erase(it, s.end());
+    }
+
+    if (Lloyd.size() > 0) {
+        auto it_L = Lloyd.begin();
+        it_L++;
+        Lloyd.erase(it_L, Lloyd.end());
+    }
+
+    if (reverse_centroids.size() > 0) {
+        auto it_R = reverse_centroids.begin();
+        it_R++;
+        reverse_centroids.erase(it_R, reverse_centroids.end());
+    }
+
+    if (data.size() > 0) {
+        auto it_D = data.begin();
+        it_D++;
+        data.erase(it_D, data.end());
+    }
+
+    if (centroids.size() > 0) centroids.clear();
+}
+
 void Cluster::read_config(string config_file) {
     ifstream Config_File(config_file);
 
@@ -111,6 +139,11 @@ void Cluster::kMeanspp_Initialization() {
         this->centroids.push_back(next_centroid);
 
         t++;
+
+        // Delete vector
+        auto it = prob.begin();
+        it++;
+        prob.erase(it, prob.end());
     }
 
     auto end = high_resolution_clock::now();
@@ -165,8 +198,6 @@ void Cluster::Lloyd_method() {
         Lloyd.push_back(make_pair(this->data[centroid], empty_vec));
     }
 
-    centroids.clear();
-
     auto begin = high_resolution_clock::now();
 
     vector<vector<int>> previous_clusters(number_of_clusters, empty_vec);
@@ -196,13 +227,20 @@ void Cluster::Lloyd_method() {
         // Store previous clusters before Updating them
         // Update centroids
         for (int centroid = 0; centroid < number_of_clusters; centroid++) {
+            previous_clusters[centroid].clear();
             previous_clusters[centroid] = Lloyd[centroid].first;
             Lloyd[centroid].first = Calculate_Mean(Lloyd[centroid].second);
         }
+
+        centroids.clear();
     }
 
     auto end = high_resolution_clock::now();
     Cluster_time = end - begin;
+
+    auto it = previous_clusters.begin();
+    it++;
+    previous_clusters.erase(it, previous_clusters.end());
 }
 
 void Cluster::Silhouette() {
@@ -284,7 +322,6 @@ void Cluster::Silhouette() {
 
             // Calculate Silhouette
             sil[cluster] += (b - a) / (b > a ? b : a);
-            // cout << sil[i] << ", " << a << ", " << b << endl;
         }
 
         sil[cluster] /= size_of_cluster;
@@ -296,6 +333,19 @@ void Cluster::Silhouette() {
     duration<double, std::milli> time = end - begin;
     
     cout << "Silhouette TIME: " << time.count() << endl;
+
+    // Deallocate Memory
+    auto it = dists.begin();
+    it++;
+    dists.erase(it, dists.end());
+
+    auto it_v = temp.begin();
+    it_v++;
+    temp.erase(it_v, temp.end());
+
+    auto it_s = sil.begin();
+    it_s++;
+    sil.erase(it_s, sil.end());
 }
 
 
@@ -490,8 +540,6 @@ int Cluster::reverse_assignment(void) {
 
             // update the radius
             radius *= 2;
-
-            // cout << radius << endl;
         }
 
         // update the untracked vectors, and check for new changes
@@ -514,7 +562,6 @@ int Cluster::reverse_assignment(void) {
     
 	auto end = high_resolution_clock::now();
     Cluster_time = end - begin;
-
 };
 
 void Cluster::print() {

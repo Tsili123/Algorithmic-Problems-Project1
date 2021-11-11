@@ -57,10 +57,7 @@ int main(int argc, char *argv[]) {
     
     Output.close();
 
-    // cout << "BRUTE SRB" << endl;
-    // for (auto v: Brute_by_range(Lsh->queries_data[0])) {
-    //     cout << "BRUTE SBR POINT: " << v << endl;
-    // }
-
     Print_values();
+
+    delete(Lsh);
 }
