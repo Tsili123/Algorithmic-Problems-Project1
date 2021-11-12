@@ -5,8 +5,6 @@ class Hypercube;
 using namespace std;
 Hypercube *Hpb;
 
-// ./cube -i ./files/input_small_id -q ./files/query_small_id -o output_file
-
 int main(int argc, char *argv[]) {
 
     store_data(argc, argv);
@@ -37,7 +35,6 @@ int main(int argc, char *argv[]) {
         list<int> neighbors;
         list<double> neighbors_dists;
         Hpb->RNeighbors(Hpb->query_data[query],Hpb->R,neighbors, neighbors_dists);
-        // neighbors_dists.sort();
 
         for (int neighbor = 0; neighbor < Hpb->N; neighbor++) {
             Output << "Nearest neighbor-" << neighbor << ": ";

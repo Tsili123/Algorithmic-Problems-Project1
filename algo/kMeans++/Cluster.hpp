@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <chrono>
 
-#include "./Handling_input.hpp"
+#include "./Handling_input_cluster.hpp"
 #include "../LSH_Folder/LSH.hpp"
 #include "../Hypercube/hypercube.hpp"
 #define NUM 1.79769e+308 // Biggest double num that can be defined
