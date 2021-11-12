@@ -8,7 +8,6 @@ Hypercube::Hypercube(string input_, std::string query_, std::string output_,int 
 			
             //measure the time that it takes to initialize the hypercube
             time_t start, finish;
-            //fprintf(stdout, "Hypercube program with parameters:  k = %d, threshold = %d points_num = %d, space = %d, max_probes = %d,", k, threshold, points_num, space, max_probes);
             time(&start);
 
             // we have a bitstring of k bits, thus the size of the hypercube table will be 2^k
@@ -31,7 +30,9 @@ Hypercube::Hypercube(string input_, std::string query_, std::string output_,int 
 			this->hypercube.reserve(this->buckets_num);
 
 			for(int i=0;i<this->k;i++){
+                // create function f_i to produce random values
     			f_i.push_back(uniform_int_distribution<int>(0,1));
+                // for every Hi_map insert pairs (h_i, f_i)
 				this->Hi_map.push_back(unordered_map<int, bool>());
 			}
 
@@ -44,14 +45,13 @@ Hypercube::Hypercube(string input_, std::string query_, std::string output_,int 
                 hypercube.push_back(temp_list);
             }
 			
-			//cout << points_num << endl;
 			//insert all of the points into the hypercube
 			for (int i = 0; i < points_num; i++) {
 				int bucket_id = hypercube_hash(data_vectors.at(i));
 				this->hypercube[bucket_id].push_back(i);
 			}
 
-			// hypercube initialization done. print the time differenct
+			// hypercube initialization done. print the time difference
 
 			time(&finish);
 			std::cout << " Hypercube created in " << difftime(finish, start) << " sec" << std::endl;
@@ -116,11 +116,6 @@ void Hypercube::RNeighbors(std::vector<int> query, int radius, std::list<int>& n
     double curr_Dist; // Distance of a point in list
     std::vector<Neighbor_Vertice> Neighbor_Vertices; // Keep all neighbors  
     int neighbors_num = 0; 
-    
-    // Clear given lists 
-    //neighbors.clear();
-    //if(neighbors_dists != NULL)
-    //	neighbors_dists->clear();
 
     // Find initial vertice 
     cube_id = hypercube_hash(query);
@@ -132,17 +127,13 @@ void Hypercube::RNeighbors(std::vector<int> query, int radius, std::list<int>& n
         if(i == cube_id)
             continue;
 
+        // create list of neighbor buckets
         Neighbor_Vertices.push_back(Neighbor_Vertice(hammingDistance(cube_id, i), i));
     }
 
     // Sort Neighbor Vertices 
     make_heap(Neighbor_Vertices.begin(), Neighbor_Vertices.end(), Compare_Vertices());//, Compare_Vertices()
     sort_heap(Neighbor_Vertices.begin(), Neighbor_Vertices.end(), Compare_Vertices());
-
-    //  for(i = 0; i < this->buckets_num; i++){
-    //  	std::cout << Neighbor_Vertices[i].id << " ";
-    // }
-    //std::cout << "probes" << this->max_probes  ;
 
     // Check probes vertices for neighbors 
     for(i = 0; i < this->max_probes; i++){
@@ -156,7 +147,6 @@ void Hypercube::RNeighbors(std::vector<int> query, int radius, std::list<int>& n
 
         // Empty vertice(bucket) 
         if(this->hypercube[pos].size() == 0){
-            //cout << "here " << i << "\n";
             continue;
         }
 
@@ -170,8 +160,7 @@ void Hypercube::RNeighbors(std::vector<int> query, int radius, std::list<int>& n
             // Keep neighbor 
             if(curr_Dist < radius){
                 neighbors.push_back(*iter+1);
-                //if(neighbors_dists != NULL)
-                    neighbors_dists.push_back(curr_Dist);
+                neighbors_dists.push_back(curr_Dist);
             }
 
             // Found m neighbors 
@@ -207,10 +196,6 @@ void Hypercube::nNeighbor(vector<int> query, int N, vector<pair<long double, int
 	make_heap(Neighbor_Vertices.begin(), Neighbor_Vertices.end(), Compare_Vertices());
 	sort_heap(Neighbor_Vertices.begin(), Neighbor_Vertices.end(), Compare_Vertices());
 
-	// for(i = 0; i < this->buckets_num; i++){
-	// 	 	std::cout << Neighbor_Vertices[i].id << " ";
-	// }
-
 	long double min = 4294967291;
     // Check probes vertices for neighbors 
 	for(i = 0; i < this->max_probes; i++){
@@ -220,7 +205,7 @@ void Hypercube::nNeighbor(vector<int> query, int N, vector<pair<long double, int
 			pos = cube_id;
 		// Extract minimum position
 		else
-			pos = Neighbor_Vertices[i-1].id;
+			pos = Neighbor_Vertices[i-1].id; // i is 1 in this iteration so we check i-1 to get the first neighbor
 		
 		// Empty vertice 
 		if(this->hypercube[pos].size() == 0)
@@ -234,10 +219,10 @@ void Hypercube::nNeighbor(vector<int> query, int N, vector<pair<long double, int
 			// Find current distance 
 			curr_Dist = euclidean_dis(data_vectors.at(*iter),query);
 				
-			if(curr_Dist < min){
+			// Check readme
+            if(curr_Dist < min){
                	
 				min = curr_Dist;
-				//cout << *iter << "\n";
 				for(auto j = near_items.begin();j!=near_items.end();j++){
 					if(j->second == *iter+1){
 						var=true;
