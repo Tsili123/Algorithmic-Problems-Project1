@@ -15,7 +15,6 @@
 #include <chrono>
 
 #include "./Handling_input/Handling_input.hpp"
-// #include "../Handling_input/Handling_input_cube.hpp"
 #include "../Handling_input/Handling_input.hpp"
 #include "../LSH/LSH.hpp"
 #include "../LSH/hypercube.hpp"
@@ -49,14 +48,11 @@ class Cluster {
 		// vector that hols the index of the centroid that the current index's vector is assigned to
 		vector<int> assigned_centroid;
 
+        // The first vector is the centroid and the second is a vector of indexes
         vector<pair<vector<int>, vector<int>>> reverse_centroids;
-
-		// in case of lsh, we need these extra variables
-		//LSH* lsh_ptr;
 
 		// in case of hypercube, we need these extra variables
 		Hypercube* hypercube_ptr;
-        //---------
 
     public:
         vector<vector<int>> data; // Input data
@@ -64,7 +60,7 @@ class Cluster {
         Cluster(string, string, string, bool, string);
         ~Cluster();
 
-        void kMeanspp_Initialization();
+        void kMeanspp_Initialization(); /* Initializes the centroids */
         void Lloyd_method();
         vector<int> Calculate_Mean(vector<int>);
         bool Compare(vector<vector<int>>);
@@ -82,7 +78,5 @@ class Cluster {
         long int  min_distance_between_centroids(void);
         int reverse_assignment(void);
 };
-
-long double euclidean_dis(vector<int> vec1, vector<int> vec2);
 
 #endif

@@ -10,11 +10,12 @@ extern LSH *Lsh;
 Cluster::Cluster(string input, string config, string out, bool comp, string method)
                 :input_file(input), config_file(config), output_file(out), complete(comp), Method(method) {
                     
-                    read_config(config);
+                    read_config(config); // Read configuration file
                     this->num_of_Items = num_of_points();
                 }
 
 Cluster::~Cluster() {
+    // Deallocate all memory
     if (s.size() > 0) {
         auto it = s.begin();
         it++;
@@ -67,6 +68,12 @@ void Cluster::read_config(string config_file) {
     }
 }
 
+/*
+* Initializes the centroids (centroids are part of the input data)
+* The first centroid is uniformly picked
+* The rest of the centroids are picked based on probability (Probability = distance/sum of distances)
+* distance = the distance of the point relative to its closest centroid
+*/
 void Cluster::kMeanspp_Initialization() {
     int t = 1, input_items = this->num_of_Items;
 
@@ -81,13 +88,8 @@ void Cluster::kMeanspp_Initialization() {
 
     this->centroids.push_back(random_index);
 
-    long double P = 0.0;
-    long int next_max_D = -1;
-
     while(t != this->number_of_clusters) {
         long double sum_min_dists = 0.0;
-        long int previous_max_D = next_max_D;
-        next_max_D = -1;
         vector<pair<int, long double>> prob;
         for (int point = 0; point < input_items; point++) {
             // If point is not a centroid
@@ -97,23 +99,13 @@ void Cluster::kMeanspp_Initialization() {
                 // Find the closest centroid to the point
                 for (auto centroid: this->centroids) {
                     long double point_dist;
-                    if (P == 0.0) point_dist = euclidean_dis(this->data[point], this->data[centroid]);
-                    else {
-                        random_device generator;
-                        uniform_real_distribution<float> distance(0.0, P);
-
-                        point_dist = distance(generator);
-                        point_dist /= previous_max_D;
-                    }
+                    point_dist = euclidean_dis(this->data[point], this->data[centroid]);
 
                     if (point_dist < dis) {
                         dis = point_dist;
                         potential_centroid = point;
                     }
                 }
-
-                // Keep max distance
-                if (dis > next_max_D) next_max_D = dis;
 
                 sum_min_dists += dis;
 
@@ -122,14 +114,12 @@ void Cluster::kMeanspp_Initialization() {
             }
         }
 
-        P = sum_min_dists;
-
         long double highest_prob = -1;
         int next_centroid = -1;
         // The point with the highest probability with be the next centroid
         // Probability = distance/sum of distances
         for (auto item: prob) {
-            long double prob = item.second/P;
+            long double prob = item.second/sum_min_dists;
             if (prob > highest_prob) {
                 highest_prob = prob;
                 next_centroid = item.first;
@@ -152,6 +142,9 @@ void Cluster::kMeanspp_Initialization() {
     cout << "kMeans++ TIME: " << time.count() << endl;
 }
 
+/*
+* Find new centroid witch is the mean of all point in the cluster
+*/
 vector<int> Cluster::Calculate_Mean(vector<int> near_points) {
     long int T = near_points.size();
     int size = this->data[0].size();
@@ -190,8 +183,14 @@ bool Cluster::Compare(vector<vector<int>> previous_clusters) {
     return false;
 }
 
+/*
+* Assign each point to its closest centroid
+* Update the centroids (Mean of cluster)
+* Do this until the difference between the new centroids and the previous is less than 1% (function Compare)
+*/
 void Cluster::Lloyd_method() {
 
+    // Store initial kMeans++ centroids
     vector<int> empty_vec;
     empty_vec.clear();
     for (auto centroid: centroids) {
@@ -201,7 +200,6 @@ void Cluster::Lloyd_method() {
     auto begin = high_resolution_clock::now();
 
     vector<vector<int>> previous_clusters(number_of_clusters, empty_vec);
-    // previous_clusters.clear();
     // Do this until there is almost no difference to the centroids
     while (Compare(previous_clusters)) {
         // Assign each point to its centroid
@@ -368,7 +366,6 @@ int Cluster::nearest_centroid(vector<int> vec) {
 	// compute the distances to all the centroids
 	for (int i = 0; i < number_of_clusters; i++) {
 		long int temp_distance = euclidean_dis(vec, this->reverse_centroids[i].first);
-        //cout << " here error " << temp_distance <<endl;
 
 		// set it as min
 		if (temp_distance < min_distance) {
@@ -376,7 +373,6 @@ int Cluster::nearest_centroid(vector<int> vec) {
 			nearest_centroid = i;
 		}
 	}
-    //cout << " nearest cetroid " << nearest_centroid <<endl;
 	assert(nearest_centroid != -1);
 
 	return nearest_centroid;
@@ -403,8 +399,8 @@ long int  Cluster::min_distance_between_centroids(){
 }
 
 
-// This function compares all new clusters to their previous
-// if the clusters have not changed much then return false else return true
+// This function computes the distance between the new and the previous centroids
+// if the distance is less than 0.1 to at least half the centroids then return false else return true
 bool Cluster::Compare1(vector<pair<vector<int>, vector<int>>> previous_clusters) {
     int sum_of_diff_centroids = 0;
     for (int centroid = 0; centroid < number_of_clusters; centroid++) {
@@ -419,6 +415,7 @@ bool Cluster::Compare1(vector<pair<vector<int>, vector<int>>> previous_clusters)
     else return true;
 }
 
+// Check if the clusters changed
 bool Cluster::Check(vector<pair<vector<int>, vector<int>>> previous_clusters) {
     int sum_of_diff_points = 0;
     for (int centroid = 0; centroid < number_of_clusters; centroid++) {
@@ -434,6 +431,9 @@ bool Cluster::Check(vector<pair<vector<int>, vector<int>>> previous_clusters) {
     return false;
 }
 
+/*
+*
+*/
 int Cluster::reverse_assignment(void) {
 
     auto begin = high_resolution_clock::now();
@@ -514,7 +514,7 @@ int Cluster::reverse_assignment(void) {
                     // get the current vector
                     int current_vector = iter->second;
                     if(assigned_centroid.at(current_vector) != -1) {
-                        // chcek if its distance from the current centroid, is less than the previous' one
+                        // check if its distance from the current centroid, is less than the previous' one
                         int assigned_prev = assigned_centroid.at(current_vector); 
                         int prev_distance = euclidean_dis(data.at(current_vector), this->reverse_centroids[assigned_prev].first);
                         int new_distance = iter->first;
@@ -542,7 +542,7 @@ int Cluster::reverse_assignment(void) {
             radius *= 2;
         }
 
-        // update the untracked vectors, and check for new changes
+        // Assign the rest of the points to their closest centroid
         for (int i = 0; i < num_of_Items; i++) {
             
             // for each one not tracked, use direct assignment

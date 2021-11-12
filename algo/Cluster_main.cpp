@@ -11,7 +11,6 @@ int main(int argc, char *argv[]) {
     else 
         cluster->reverse_assignment();
 
-    cout << "Finito" << endl;
     cluster->Silhouette();
     cluster->output();
     cluster->print();
