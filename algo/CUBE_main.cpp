@@ -1,5 +1,5 @@
-#include "./Handling_input/Handling_input_cube.hpp"
-#include "./LSH_File/hypercube.hpp"
+#include "./Hypercube/Handling_input_cube.hpp"
+#include "./Hypercube/hypercube.hpp"
 
 class Hypercube;
 using namespace std;
@@ -59,6 +59,8 @@ int main(int argc, char *argv[]) {
     }
     
     Output.close();
+
+    delete Hpb;
 
     // Print_values();
 }

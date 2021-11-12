@@ -1,12 +1,12 @@
-#include "./Handling_input_cube.hpp"
-#include "../LSH_File/hypercube.hpp"
+#include "./LSH.hpp"
 
 using namespace std;
-extern Hypercube *Hpb;
 
-void store_data(int argc,char** argv){
+extern LSH *Lsh; /* LSH Object */
+
+void store_LSH_data(int argc,char** argv){
     string input_file = "", query_file = "", output_file = "";
-    int N = 1, R = 10000, k = 14, probes = 2, M = 10;
+    int N = 1, R = 10000, k = 4, L = 5;
 
     if(argc < 7 || argc > 15){
         cout << "Error in command line arguments:" << endl;
@@ -32,9 +32,9 @@ void store_data(int argc,char** argv){
             i++;
             k = atoi(argv[i]);
         }
-        else if (!strcmp(argv[i], "-probes")) {
+        else if (!strcmp(argv[i], "-L")) {
             i++;
-            probes = atoi(argv[i]);
+            L = atoi(argv[i]);
         }
         else if (!strcmp(argv[i], "-N")) {
             i++;
@@ -50,9 +50,9 @@ void store_data(int argc,char** argv){
         cout << "Error: Missing files directory" << endl;
         exit (EXIT_FAILURE);
     }
-    //data vector
+
     vector<vector<int>> vec;
     read_file(vec,input_file);
 
-    Hpb = new Hypercube(input_file,query_file, output_file, R,k,1000,num_of_points(),N, dim_data(),probes,vec);
+    Lsh = new LSH(input_file, query_file, output_file, L, N, k, R, num_of_points(), dim_data(), vec);
 }

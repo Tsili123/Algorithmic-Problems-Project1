@@ -1,4 +1,4 @@
-#include "./LSH_File/LSH.hpp"
+#include "./LSH_Folder/LSH.hpp"
 
 using namespace std;
 

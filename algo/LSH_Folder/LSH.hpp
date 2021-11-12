@@ -15,7 +15,7 @@
 
 #define M 4294967291
 
-#include "../Handling_input/Handling_input.hpp"
+#include "./Handling_input.hpp"
 #include "../functions/functions.hpp"
 
 using namespace std;

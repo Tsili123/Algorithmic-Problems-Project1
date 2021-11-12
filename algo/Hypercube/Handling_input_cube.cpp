@@ -1,15 +1,14 @@
-#include "../LSH_File/LSH.hpp"
-#include "../kMeans++/Cluster.hpp"
+#include "./Handling_input_cube.hpp"
+#include "./hypercube.hpp"
 
 using namespace std;
+extern Hypercube *Hpb;
 
-extern LSH *Lsh; /* LSH Object */
-
-void store_LSH_data(int argc,char** argv){
+void store_data(int argc,char** argv){
     string input_file = "", query_file = "", output_file = "";
-    int N = 1, R = 10000, k = 4, L = 5;
+    int N = 1, R = 10000, k = 14, probes = 2, M = 10;
 
-    if(argc < 7 || argc > 15){
+    if(argc < 7 || argc > 17){
         cout << "Error in command line arguments:" << endl;
         cout << "argc " << argc << endl;
         cout << "Program exiting due to error ..." << endl;
@@ -33,9 +32,9 @@ void store_LSH_data(int argc,char** argv){
             i++;
             k = atoi(argv[i]);
         }
-        else if (!strcmp(argv[i], "-L")) {
+        else if (!strcmp(argv[i], "-probes")) {
             i++;
-            L = atoi(argv[i]);
+            probes = atoi(argv[i]);
         }
         else if (!strcmp(argv[i], "-N")) {
             i++;
@@ -45,15 +44,19 @@ void store_LSH_data(int argc,char** argv){
             i++;
             R = atoi(argv[i]);
         }
+        else if (!strcmp(argv[i], "-M")) {
+            i++;
+            M = atoi(argv[i]);
+        }
     }
 
     if (input_file == "" || query_file == "" || output_file == "") {
         cout << "Error: Missing files directory" << endl;
         exit (EXIT_FAILURE);
     }
-
+    //data vector
     vector<vector<int>> vec;
     read_file(vec,input_file);
 
-    Lsh = new LSH(input_file, query_file, output_file, L, N, k, R, num_of_points(), dim_data(), vec);
+    Hpb = new Hypercube(input_file,query_file, output_file, R,k,1000,num_of_points(),N, dim_data(),probes,vec);
 }
