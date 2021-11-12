@@ -431,9 +431,6 @@ bool Cluster::Check(vector<pair<vector<int>, vector<int>>> previous_clusters) {
     return false;
 }
 
-/*
-*
-*/
 int Cluster::reverse_assignment(void) {
 
     auto begin = high_resolution_clock::now();
