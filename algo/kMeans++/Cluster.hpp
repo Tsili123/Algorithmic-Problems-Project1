@@ -16,8 +16,8 @@
 
 #include "./Handling_input/Handling_input.hpp"
 #include "../Handling_input/Handling_input.hpp"
-#include "../LSH/LSH.hpp"
-#include "../LSH/hypercube.hpp"
+#include "../LSH_File/LSH.hpp"
+#include "../LSH_File/hypercube.hpp"
 #define NUM 1.79769e+308 // Biggest double num that can be defined
 
 using std::chrono::high_resolution_clock;

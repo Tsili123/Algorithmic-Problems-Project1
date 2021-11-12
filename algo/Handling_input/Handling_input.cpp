@@ -1,4 +1,4 @@
-#include "../LSH/LSH.hpp"
+#include "../LSH_File/LSH.hpp"
 #include "../kMeans++/Cluster.hpp"
 
 using namespace std;

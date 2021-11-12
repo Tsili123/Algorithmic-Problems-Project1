@@ -1,5 +1,5 @@
 #include "./Handling_input_cube.hpp"
-#include "../LSH/hypercube.hpp"
+#include "../LSH_File/hypercube.hpp"
 
 using namespace std;
 extern Hypercube *Hpb;
