@@ -13,6 +13,7 @@ LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_,
         data = Data;
         W = Calculate_w();
 
+        // Number of buckets per hash table
         hashtable_size = n/4;
         Hash_Funs = new Euclidean_Hash_Function[L];
          //Declaration of hash tables...
@@ -35,6 +36,7 @@ LSH::LSH(string input, string query, string output, int L_,int N_,int k_,int R_,
     }
 
 LSH::~LSH() {
+    // Deallocate Data
     if (data.size() > 0) {
         auto it_D = data.begin();
         it_D++;
@@ -42,7 +44,7 @@ LSH::~LSH() {
     }
 
     if (hashtables) {
-        for(int i=0;i<L;i++) {
+        for(int i = 0; i < L; i++) {
             for (int j = 0; j < hashtable_size; j++)
                 delete hashtables[i][j];
 
@@ -72,6 +74,8 @@ void LSH::print_buckets() {
     }
 }
 
+
+/* Mod function that handles negative values */
 long long int mod(long long int value, long int Mod) {
     if ((value % Mod) < 0) 
         return (unsigned int) (value % Mod + Mod);
@@ -92,7 +96,7 @@ vector<long long int> LSH::Specific_Hash_Value(int g, vector<int> item) {
         int sum = 0;
         vector <double> v = Hash_Fun.get_vector_v()[h];
         vector <double> t = Hash_Fun.get_vector_t();
-        /* The inner product is calculated by multiplying all the coordinates of 2 vectors and summing them*/
+        /* The inner product is calculated by multiplying all the coordinates of 2 vectors and summing them */
         for (int dim = 1; dim < this->get_dimension(); dim++) {
             sum += item[dim] * v[dim];
         }
@@ -103,6 +107,7 @@ vector<long long int> LSH::Specific_Hash_Value(int g, vector<int> item) {
         hash_value = mod(hash_value, M);
     }
 
+    // Storing the ID before second mod
     ID = hash_value;
 
     return {mod(hash_value, this->get_hashtablesize()), ID};
@@ -132,6 +137,10 @@ void Print_values() {
     // Lsh->print_buckets();
 }
 
+/*
+* w is defined by calculating the average euclidean distance between 5% of the input data
+* if the input is small and therefore 5% is less than zero then take half the points into consideration
+*/
 int LSH::Calculate_w() {
     long double sum = 0;
     long int subpoints = this->points_num * 5/100;
@@ -183,6 +192,14 @@ Euclidean_Hash_Function::~Euclidean_Hash_Function() {
     t.erase(it_t, t.end());
 }
 
+/*
+* To find the N-Nearest Items to the query
+** go the each table
+** find the bucket the query belongs to
+** find the N nearest points to the query (with euclidean distance)
+** do the same for next table
+** whilst doing that compare the nearest items you found in the tables with each other and keep the N-closest
+*/
 vector<pair<long double, int>> Nearest_N_search(vector<int> query) {
     long double d = M; // Minimum distance
     long int b = -1; // Closest item so far
@@ -195,10 +212,15 @@ vector<pair<long double, int>> Nearest_N_search(vector<int> query) {
     Bucket *** buckets = Lsh->get_hashtables();
 
     for (int g = 0; g < L; g++) {
+        // Get the bucket the query belongs to
         vector<long long int> hash_value = Lsh->Specific_Hash_Value(g, query);
+
+        // if bucket is empty then skip it
         if (buckets[g][hash_value[0]] == NULL) continue;
 
+        // For each point calculate L2 distance to find the nearest
         for (auto Points: buckets[g][hash_value[0]]->points) {
+            // index = Item_id of point in bucket
             int index = Points.first.first;
             long double euc_dist = euclidean_dis(Lsh->data[index], query);
 
@@ -220,6 +242,14 @@ vector<pair<long double, int>> Nearest_N_search(vector<int> query) {
     return near_items;
 }
 
+/*
+* To find the Nearest Items to the query within a range
+** go the each table
+** find the bucket the query belongs to
+** calculate euclidean distance
+** if the distance is within the range then the Item is near (store the point)
+*** if the iterations reach 100*L then stop the search
+*/
 vector<int> Search_by_range(vector<int> query) {
     long int iterations = 0; // When it reaches 100L stop
     int L = Lsh->get_L();
@@ -252,6 +282,8 @@ vector<int> Search_by_range(vector<int> query) {
     return near_items;
 }
 
+// This function is a duplicate of the above
+// the only difference is that it stores and returns the distance as well
 vector<std::pair<long double,int>> LSH::Search_by_range2(vector<int> query,long int R_custom) {
     long int iterations = 0; // When it reaches 100L stop
     int L = Lsh->get_L();
@@ -260,27 +292,19 @@ vector<std::pair<long double,int>> LSH::Search_by_range2(vector<int> query,long 
     vector<std::pair<long double,int>> near_items;
 
     Bucket *** buckets = Lsh->get_hashtables();
-    //cout << "L " << L << endl;
 
     for (int g = 0; g < L; g++) {
         vector<long long int> hash_value = Lsh->Specific_Hash_Value(g, query);
 
-        if (buckets[g][hash_value[0]] == NULL){
-            //cout << "hash value " << hash_value[0] << endl;
+        if (buckets[g][hash_value[0]] == NULL)
             continue;
-        }
-
-        //cout << R_custom << endl;
 
         for (auto Points: buckets[g][hash_value[0]]->points) {
-            //cout << " not empty " << buckets[g][hash_value[0]]->points.size() << endl;
             iterations++;
             int index = Points.first.first;
             long double euc_dist = euclidean_dis(Lsh->data[index], query);
-            //index += 1; // In input file the index starts from 1
 
             if (euc_dist <= R_custom) {
-                //cout << "1" << endl;
                 if (none_of(near_items.begin(), near_items.end(), [index](std::pair<long double, int> item) { return index == item.second; })) {
                     near_items.insert(near_items.begin(),std::pair<long double, int>(euc_dist,index));
                 }
@@ -292,6 +316,7 @@ vector<std::pair<long double,int>> LSH::Search_by_range2(vector<int> query,long 
     return near_items;
 }
 
+// For Debugging
 vector<int> Brute_by_range(vector<int> query) {
     int L = Lsh->get_L();
     int k = Lsh->get_k();

@@ -25,6 +25,8 @@ using std::chrono::duration;
 class Bucket
 {
     public:
+    // For each input item we store its Item_id, lsh id (after first mod) and the g value (position in hashtable)
+    // pair((Item_id, hash ID), hash value)
         vector<pair<pair<long long int, long long int>, long int>> points;     
 
         void add(long long int, long int, long long int);
@@ -50,7 +52,7 @@ class LSH {
         // #Points
         long long int points_num;
 
-        // #Dimensions
+        // #Dimensions of the point
         // #Numbers in a vector of an item
         int dimension;
         int w;
@@ -84,21 +86,23 @@ class LSH {
         int Calculate_w();
         vector<long long int> Specific_Hash_Value(int g, vector<int> item);
 
-        void print_buckets();
+        void print_buckets(); /* Used for Debugging */
 
         vector<pair<long double,int>> Search_by_range2(vector<int> query,long int R_custom) ;
 };
 
-void LSH_Insert_Points_To_Buckets(LSH* info);
+void LSH_Insert_Points_To_Buckets(LSH* info); /* Initialize Data (Input) */
 
-long long int mod(long long int, long int);
+long long int mod(long long int, long int); /* This mod can handle negative values */
 
 void Print_values(); /* Used for Debugging */
 
-vector<int> Brute_by_range(vector<int> );
+vector<int> Brute_by_range(vector<int> ); /* Used for Debugging */
 
+/* Finds the N-Nearest Items to the query using LSH hash function */
 vector<pair<long double, int>> Nearest_N_search(vector<int> );
 
+/* Finds the Items that are within a range relative to the query using LSH hash function */
 vector<int> Search_by_range(vector<int> );
 
 #endif
