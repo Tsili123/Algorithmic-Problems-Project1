@@ -4,6 +4,8 @@ Assignment for the first part of the project "Software development for algorithm
 
 # Hypercube 
 
+## The theory that implementation is based on
+
 ![alt text](https://github.com/NizarDarwish/Algorithmic-Problems-Project1/blob/main/algo1.PNG)
 
 ![alt text](https://github.com/NizarDarwish/Algorithmic-Problems-Project1/blob/main/algo2.PNG)
