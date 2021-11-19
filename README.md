@@ -27,3 +27,9 @@ Same logic is applied on the nearest neighbour search , but this time we save a 
 ### The files of the implementation can be found on the path ./algo/Hypercube
 ### The classed of the progeam can be reviewed on the [```header file```](https://github.com/NizarDarwish/Algorithmic-Problems-Project1/blob/main/algo/Hypercube/hypercube.hpp)
 
+### Run 
+Just type ```make``` in the algo directory of the assignment, because makefile is included .Then ```./cube -i ./files/input_small_id -q ./files/query_small_id -k 14 -M 10 -probes 2 -o output -N 5 -R 350``` 
+Note: k is the number of f_i's . M is a threshold to how many points we are searching each time. Probes means how many buckets are we cheking based on hamming distance.Output is the file that will store the result and will be created in algo directory.Finally , N is the number of nearest neighbours to a given point and R is the radius that we want to search around a given point
+
+# 2nd assignment
+Typing... :)
