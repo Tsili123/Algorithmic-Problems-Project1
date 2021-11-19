@@ -25,4 +25,5 @@ Same logic is applied on the nearest neighbour search , but this time we save a 
 
 
 ### The files of the implementation can be found on the path ./algo/Hypercube
+### The classed of the progeam can be reviewed on the [```header file```](https://github.com/NizarDarwish/Algorithmic-Problems-Project1/blob/main/algo/Hypercube/hypercube.hpp)
 
