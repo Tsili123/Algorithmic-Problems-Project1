@@ -30,7 +30,7 @@ Same logic is applied on the nearest neighbour search , but this time we save a 
 
 
 ### The files of the implementation can be found on the path ./algo/Hypercube
-### The structure of the progeam can be reviewed on the [```header file```](https://github.com/NizarDarwish/Algorithmic-Problems-Project1/blob/main/algo/Hypercube/hypercube.hpp)
+### The structure of the program can be reviewed on the [```header file```](https://github.com/NizarDarwish/Algorithmic-Problems-Project1/blob/main/algo/Hypercube/hypercube.hpp)
 
 ### Run 
 Just type ```make``` in the algo directory of the assignment, because makefile is included .
