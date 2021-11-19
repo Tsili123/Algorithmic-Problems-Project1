@@ -22,7 +22,7 @@ Let's have a look at the next step of the algorthm , which is to find the f_i va
 The  [```third```](https://github.com/NizarDarwish/Algorithmic-Problems-Project1/blob/main/algo/Hypercube/hypercube.cpp#L102) and final part of the algorithm consists of creating a searching function to solve querys.It means that we hash a given vector and find its position on the hashtable.The logic behind this , as shown on the images above, can be explained in 3 steps :
 
 1. Hash the point and find the cube id(the bucket id of the hypercube)
-2. Then , find the neighbour buckets of the found bucket based on the hamming distance of them(the different number of zeroes and aces)
+2. Then , find the neighbour buckets of that bucket based on the hamming distance of them(the different number of zeroes and aces)
 3. Finally , search points in the same vertex(bucket) and nearbly vertices in order to find points in the given radius (R)
 
 Same logic is applied on the nearest neighbour search , but this time we save a specific number of neighbours and not all of them in a given radius.
