@@ -1,6 +1,5 @@
 # Algorithmic-Problems
 Assignment for the first part of the project "Software development for algorithmic problems"
-## The produced code and the report holds copyright license and a permission from the creators is needed to be reused officialy. ©
 
 # LSH
 Typing... :)
@@ -44,3 +43,5 @@ Note2: The program run almost instantly
 
 # Clustering
 Typing... :)
+
+## The produced code and the report holds copyright license and a permission from the creators is needed to be reused officialy. ©
