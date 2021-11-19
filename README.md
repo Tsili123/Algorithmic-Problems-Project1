@@ -1,5 +1,5 @@
 # Algorithmic-Problems
-# The produced code and the report holds copyright license and a permission from the creators is needed to be reused. ©
+## The produced code and the report holds copyright license and a permission from the creators is needed to be reused. ©
 
 Assignment for the first part of the project "Software development for algorithmic problems"
 
